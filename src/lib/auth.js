@@ -1,7 +1,6 @@
 import { supabase } from '$lib/supabaseClient.js';
 import { writable } from 'svelte/store';
-
-const userSession = writable(null);
+import { userSession } from '../stores/userSession';
 
 export async function login(email, password) {
 	try {
@@ -20,6 +19,10 @@ export async function login(email, password) {
 	}
 }
 
+supabase.auth.onAuthStateChange((event, session) => {
+	console.log(event, session);
+});
+
 export async function logout() {
 	const { error } = await supabase.auth.signOut();
 	if (error) {
@@ -27,9 +30,22 @@ export async function logout() {
 		console.log(error);
 	}
 	userSession.set(null);
+	//console.log('Clicked on logout, clearing userSession in logout() auth.js');
 }
 
-export function isAuthenticated() {
-	const user = userSession;
-	return user !== null;
+export async function isAuthenticated() {
+	const { data, error } = await supabase.auth.getSession();
+
+	if (error) {
+		console.log(error);
+		return false;
+	}
+
+	if (data.session !== null) {
+		console.log('TRUE isAuthenticated() data:', data);
+		return true;
+	} else if (data.session === null) {
+		console.log('FALSE isAuthenticated() data:', data);
+		return false;
+	}
 }
