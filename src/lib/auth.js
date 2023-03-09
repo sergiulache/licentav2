@@ -34,18 +34,14 @@ export async function logout() {
 }
 
 export async function isAuthenticated() {
-	const { data, error } = await supabase.auth.getSession();
+	const { data: session, error } = await supabase.auth.getSession();
 
-	if (error) {
-		console.log(error);
+	if (error || !session || session.session === null) {
+		console.log(session);
+		//throw redirect(302, '/auth/login');
 		return false;
-	}
-
-	if (data.session !== null) {
-		console.log('TRUE isAuthenticated() data:', data);
+	} else {
+		console.log(session);
 		return true;
-	} else if (data.session === null) {
-		console.log('FALSE isAuthenticated() data:', data);
-		return false;
 	}
 }
