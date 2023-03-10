@@ -1,6 +1,7 @@
 <script>
 	import { supabase } from '$lib/supabaseClient.js';
 	import { login } from '$lib/auth.js';
+	import {goto} from '$app/navigation';
 
 	// import transitions from svelte
 	import { fade, fly, slide } from 'svelte/transition';
@@ -27,7 +28,8 @@
 	function handleLogin() {
 		login(email, password).then((success) => {
 			if (success) {
-				alert('Logged in!');
+				console.log('Logged in!');
+				goto('/auctions')
 			} else {
 				badCredentials = true;
 			}

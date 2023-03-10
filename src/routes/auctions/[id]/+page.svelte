@@ -2,5 +2,9 @@
 	export let data;
 </script>
 
-<h1>{data.title}</h1>
-<div>{@html data.content}</div>
+<h1>Items:</h1>
+<ul>
+  {#each data.items as item}
+    <li>{item.name}: {item.description}</li>
+  {/each}
+</ul>
