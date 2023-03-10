@@ -37,11 +37,22 @@ export async function isAuthenticated() {
 	const { data: session, error } = await supabase.auth.getSession();
 
 	if (error || !session || session.session === null) {
-		console.log(session);
+		//console.log(session);
 		//throw redirect(302, '/auth/login');
 		return false;
 	} else {
-		console.log(session);
+		//console.log(session);
 		return true;
+	}
+}
+
+export async function getCurrentUserID() {
+	const { data: session, error } = await supabase.auth.getSession();
+	if (error || !session || session.session === null) {
+		console.log('Error getting current user ID, not logged in');
+		return false;
+	} else {
+		const userID = session.session.user.id;
+		return userID;
 	}
 }
