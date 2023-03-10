@@ -1,6 +1,10 @@
 import { supabase } from '$lib/supabaseClient.js';
 import { writable } from 'svelte/store';
 import { userSession } from '../stores/userSession';
+import cookie from 'cookie';
+
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
 
 export async function login(email, password) {
 	try {
@@ -10,7 +14,8 @@ export async function login(email, password) {
 			// handle error
 			throw error;
 		} else {
-			userSession.set(data.session);
+			localStorage.setItem(ACCESS_TOKEN_KEY, data.session.access_token);
+			localStorage.setItem(REFRESH_TOKEN_KEY, data.session.refresh_token);
 			return true;
 		}
 	} catch (error) {
@@ -29,19 +34,25 @@ export async function logout() {
 		alert('Error logging out');
 		console.log(error);
 	}
+	localStorage.removeItem(ACCESS_TOKEN_KEY);
+	localStorage.removeItem(REFRESH_TOKEN_KEY);
 	userSession.set(null);
 	//console.log('Clicked on logout, clearing userSession in logout() auth.js');
 }
 
 export async function isAuthenticated() {
-	const { data: session, error } = await supabase.auth.getSession();
+	//const { data: session, error } = await supabase.auth.getSession();
 
-	if (error || !session || session.session === null) {
-		//console.log(session);
-		//throw redirect(302, '/auth/login');
+	const access_token = localStorage.getItem(ACCESS_TOKEN_KEY);
+	const refresh_token = localStorage.getItem(REFRESH_TOKEN_KEY);
+	//console.log(access_token);
+	//console.log(refresh_token);
+
+	if (!access_token || !refresh_token) {
+		console.log('No access token or refresh token, not logged in');
 		return false;
 	} else {
-		//console.log(session);
+		console.log('isAuthenticated() auth.js: TRUE');
 		return true;
 	}
 }

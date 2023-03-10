@@ -1,6 +1,19 @@
 <script>
 	import '../app.css';
 	import NavbarFull from '../components/navbarFull.svelte';
+
+	import { onMount } from 'svelte';
+	import { redirect } from '@sveltejs/kit';
+	import { goto } from '$app/navigation';
+	import { isAuthenticated } from '$lib/auth';
+
+	let loggedIn = false;
+	onMount(async () => {
+		loggedIn = await isAuthenticated();
+		if (!loggedIn) {
+			console.log('Layout logged in: ' + loggedIn);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -16,7 +29,9 @@
 </svelte:head>
 
 <main>
-	<NavbarFull />
+	{#if loggedIn}
+		<NavbarFull />
+	{/if}
 	<slot />
 </main>
 
