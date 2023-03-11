@@ -6,6 +6,8 @@
 	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import { isAuthenticated } from '$lib/auth';
+	import NavbarIn from '../components/navbarIN.svelte';
+	import NavbarOut from '../components/navbarOUT.svelte';
 
 	let loggedIn = false;
 	onMount(async () => {
@@ -30,7 +32,9 @@
 
 <main>
 	{#if loggedIn}
-		<NavbarFull />
+		<NavbarIn />
+	{:else}
+		<NavbarOut />
 	{/if}
 	<slot />
 </main>

@@ -5,7 +5,7 @@ export async function load() {
 	const { data } = await supabase.from('items').select();
 
 	//const loggedIn = await isAuthenticated();
-	//console.log(loggedIn);
+	//`console.log(loggedIn);
 
 	return {
 		items: data ?? []

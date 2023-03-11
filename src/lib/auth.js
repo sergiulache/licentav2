@@ -14,6 +14,8 @@ export async function login(email, password) {
 			// handle error
 			throw error;
 		} else {
+			userSession.set(data.session);
+			//console.log('userSession in login() auth.js: ', userSession);
 			localStorage.setItem(ACCESS_TOKEN_KEY, data.session.access_token);
 			localStorage.setItem(REFRESH_TOKEN_KEY, data.session.refresh_token);
 			return true;
@@ -36,8 +38,8 @@ export async function logout() {
 	}
 	localStorage.removeItem(ACCESS_TOKEN_KEY);
 	localStorage.removeItem(REFRESH_TOKEN_KEY);
-	userSession.set(null);
-	//console.log('Clicked on logout, clearing userSession in logout() auth.js');
+	//userSession.set(null);
+	console.log('Clicked on logout, clearing userSession in logout() auth.js');
 }
 
 export async function isAuthenticated() {

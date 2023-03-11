@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { isAuthenticated, logout } from '$lib/auth';
+import { goto } from '$app/navigation';
 
 export async function load() {
 	const loggedIn = await isAuthenticated();
@@ -7,6 +8,7 @@ export async function load() {
 		throw redirect(302, '/auth/login');
 	} else {
 		await logout();
-		throw redirect(302, '/auth/login');
+		goto('/auth/login');
+		//location.reload();
 	}
 }
