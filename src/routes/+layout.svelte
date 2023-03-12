@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import NavbarFull from '../components/navbarFull.svelte';
+	import { userSession } from '../stores/userSession.js';
 
 	import { onMount } from 'svelte';
 	import { redirect } from '@sveltejs/kit';
@@ -9,6 +10,7 @@
 	import NavbarIn from '../components/navbarIN.svelte';
 	import NavbarOut from '../components/navbarOUT.svelte';
 
+	/*
 	let loggedIn = false;
 	onMount(async () => {
 		loggedIn = await isAuthenticated();
@@ -16,6 +18,9 @@
 			console.log('Layout logged in: ' + loggedIn);
 		}
 	});
+	loggedIn = loggedIn;
+	*/
+	let loggedIn = $userSession;
 </script>
 
 <svelte:head>

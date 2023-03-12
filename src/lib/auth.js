@@ -38,7 +38,7 @@ export async function logout() {
 	}
 	localStorage.removeItem(ACCESS_TOKEN_KEY);
 	localStorage.removeItem(REFRESH_TOKEN_KEY);
-	//userSession.set(null);
+	userSession.set(null);
 	console.log('Clicked on logout, clearing userSession in logout() auth.js');
 }
 
@@ -55,12 +55,15 @@ export async function isAuthenticated() {
 		return false;
 	} else {
 		console.log('isAuthenticated() auth.js: TRUE');
+		//userSession.set({ access_token, refresh_token });
 		return true;
 	}
 }
 
 export async function getCurrentUserID() {
 	const { data: session, error } = await supabase.auth.getSession();
+	// get current userSession store
+	//const session = userSession.get();
 	if (error || !session || session.session === null) {
 		console.log('Error getting current user ID, not logged in');
 		return false;

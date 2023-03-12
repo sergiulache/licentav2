@@ -1,17 +1,30 @@
 <script>
-	export const ssr = true;
+	//export const ssr = true;
 	import ItemBox from '../../components/itemBox.svelte';
 	import { onMount } from 'svelte';
 	import { isAuthenticated } from '$lib/auth';
 	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
+	import { userSession } from '../../stores/userSession.js';
+	import { getCurrentUserID } from '$lib/auth';
 
+	/*
 	let loggedIn = false;
 	onMount(async () => {
 		loggedIn = await isAuthenticated();
 		if (!loggedIn) {
 			goto('/auth/login');
 			//location.reload();
+		}
+	});
+	*/
+	let loggedIn = $userSession;
+	// if (!loggedIn) {
+	// 	goto('/auth/login');
+	// }
+	onMount(async () => {
+		if (!loggedIn) {
+			goto('/auth/login');
 		}
 	});
 	export let data;
