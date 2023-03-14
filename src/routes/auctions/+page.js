@@ -8,7 +8,8 @@ import { get } from 'svelte/store';
 export async function load() {
 	const { data } = await supabase.from('items').select();
 
-	let userID = await getCurrentUserID();
+	const userID = await getCurrentUserID();
+	console.log(userID);
 	// select all items where poster_Id = userID
 	const { data: userItems, error } = await supabase.from('items').select().eq('poster_Id', userID);
 

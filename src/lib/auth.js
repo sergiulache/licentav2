@@ -16,8 +16,8 @@ export async function login(email, password) {
 		} else {
 			userSession.set(data.session);
 			//console.log('userSession in login() auth.js: ', userSession);
-			localStorage.setItem(ACCESS_TOKEN_KEY, data.session.access_token);
-			localStorage.setItem(REFRESH_TOKEN_KEY, data.session.refresh_token);
+			//localStorage.setItem(ACCESS_TOKEN_KEY, data.session.access_token);
+			//localStorage.setItem(REFRESH_TOKEN_KEY, data.session.refresh_token);
 			return true;
 		}
 	} catch (error) {
@@ -36,21 +36,21 @@ export async function logout() {
 		alert('Error logging out');
 		console.log(error);
 	}
-	localStorage.removeItem(ACCESS_TOKEN_KEY);
-	localStorage.removeItem(REFRESH_TOKEN_KEY);
+	//localStorage.removeItem(ACCESS_TOKEN_KEY);
+	//localStorage.removeItem(REFRESH_TOKEN_KEY);
 	userSession.set(null);
 	console.log('Clicked on logout, clearing userSession in logout() auth.js');
 }
 
 export async function isAuthenticated() {
-	//const { data: session, error } = await supabase.auth.getSession();
+	const { data: session, error } = await supabase.auth.getSession();
 
-	const access_token = localStorage.getItem(ACCESS_TOKEN_KEY);
-	const refresh_token = localStorage.getItem(REFRESH_TOKEN_KEY);
+	//const access_token = localStorage.getItem(ACCESS_TOKEN_KEY);
+	//const refresh_token = localStorage.getItem(REFRESH_TOKEN_KEY);
 	//console.log(access_token);
 	//console.log(refresh_token);
 
-	if (!access_token || !refresh_token) {
+	if (error || !session || session.session === null) {
 		console.log('No access token or refresh token, not logged in');
 		return false;
 	} else {
