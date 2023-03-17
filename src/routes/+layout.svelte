@@ -25,7 +25,6 @@
 	userSession.subscribe((value) => {
 		loggedIn = value;
 	});
-	$: console.log('layout loggedIn: ' + loggedIn);
 </script>
 
 <svelte:head>

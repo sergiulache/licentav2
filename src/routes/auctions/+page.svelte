@@ -1,5 +1,4 @@
 <script>
-	//export const ssr = true;
 	import ItemBox from '../../components/itemBox.svelte';
 	import { onMount } from 'svelte';
 	import { isAuthenticated } from '$lib/auth';
