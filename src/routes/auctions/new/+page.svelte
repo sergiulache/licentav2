@@ -1,3 +1,67 @@
+<script>
+	import { goto } from '$app/navigation';
+	import { supabase } from '$lib/supabaseClient';
+	import ModalSuccessAuction from '../../../components/modalSuccessAuction.svelte';
+
+	export let data;
+	//console.log('data in profile page: ', data.profileData);
+
+	// if no data, field is null
+	let first_name = data.profileData.first_name ? data.profileData.first_name : '';
+	let last_name = data.profileData.last_name ? data.profileData.last_name : '';
+	let country = data.profileData.country ? data.profileData.country : '';
+	let address = data.profileData.address ? data.profileData.address : '';
+	let city = data.profileData.city ? data.profileData.city : '';
+	let state = data.profileData.state ? data.profileData.state : '';
+	let zip = data.profileData.zip ? data.profileData.zip : '';
+	let title = '';
+	let description = '';
+	let preferred_price = '';
+	let preferred_date = '';
+	let starting_bid = '';
+	let expiration_date = '';
+
+	let showModal = false;
+
+	function handleCancel() {
+		goto('/auctions');
+	}
+
+	async function handleSave() {
+		let userID = data.profileData.user_id;
+		// add auction to items table, make sure to set poster_id to userID
+		const { dataAuction, error } = await supabase
+			.from('items')
+			.insert([
+				{
+					title: title,
+					description: description,
+					preferred_price: preferred_price,
+					preferred_date: preferred_date,
+					starting_bid: starting_bid,
+					expiration_date: expiration_date,
+					poster_id: userID,
+					poster_first_name: first_name,
+					poster_last_name: last_name,
+					poster_country: country,
+					poster_address: address,
+					poster_city: city,
+					poster_state: state,
+					poster_zip: zip
+				}
+			])
+			.select();
+
+		if (error != null) {
+			console.log('error: ', error);
+		} else {
+			showModal = true;
+		}
+	}
+</script>
+
+<ModalSuccessAuction show={showModal} />
+
 <div class="space-y-6 p-4 sm:ml-64">
 	<div class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
 		<div class="md:grid md:grid-cols-3 md:gap-6">
@@ -16,6 +80,7 @@
 							</label>
 							<div class="mt-1 flex rounded-md shadow-sm">
 								<input
+									bind:value={title}
 									type="text"
 									name="auction-title"
 									id="auction-title"
@@ -32,6 +97,7 @@
 						</label>
 						<div class="mt-1">
 							<textarea
+								bind:value={description}
 								id="description"
 								name="description"
 								rows="3"
@@ -45,7 +111,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-700"> Cover photo </label>
+						<p class="block text-sm font-medium text-gray-700">Cover photo</p>
 						<div
 							class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
 						>
@@ -62,6 +128,87 @@
 									<p class="pl-1">or drag and drop</p>
 								</div>
 								<p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+							</div>
+						</div>
+					</div>
+					<div class="grid grid-cols-2 gap-4">
+						<div>
+							<div>
+								<label for="price" class="block text-sm font-medium text-gray-700"
+									>Preferred Buyout Price</label
+								>
+								<div class="mt-1 relative rounded-md shadow-sm">
+									<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<span class="text-gray-500 sm:text-sm"> $ </span>
+									</div>
+									<input
+										bind:value={preferred_price}
+										type="number"
+										name="price"
+										id="price"
+										class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+										placeholder="0.00"
+										aria-describedby="price-currency"
+									/>
+									<div
+										class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+									>
+										<span class="text-gray-500 sm:text-sm" id="price-currency"> USD </span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div>
+							<label for="price" class="block text-sm font-medium text-gray-700">Starting bid</label
+							>
+							<div class="mt-1 relative rounded-md shadow-sm">
+								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<span class="text-gray-500 sm:text-sm"> $ </span>
+								</div>
+								<input
+									bind:value={starting_bid}
+									type="number"
+									name="price"
+									id="price"
+									class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+									placeholder="0.00"
+									aria-describedby="price-currency"
+								/>
+								<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+									<span class="text-gray-500 sm:text-sm" id="price-currency"> USD </span>
+								</div>
+							</div>
+						</div>
+						<!-- add date selection for preffered completion date-->
+						<div>
+							<div class="col-span-6 sm:col-span-3 lg:col-span-2">
+								<label for="date" class="block text-sm font-medium text-gray-700"
+									>Preferred Completion Date</label
+								>
+								<input
+									bind:value={preferred_date}
+									type="date"
+									name="date"
+									id="date"
+									autocomplete="date"
+									class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+								/>
+							</div>
+						</div>
+						<div>
+							<div class="col-span-6 sm:col-span-3 lg:col-span-2">
+								<label for="date" class="block text-sm font-medium text-gray-700"
+									>Expiration Date</label
+								>
+								<input
+									bind:value={expiration_date}
+									type="date"
+									name="date"
+									id="date"
+									autocomplete="date"
+									class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+								/>
 							</div>
 						</div>
 					</div>
@@ -86,6 +233,7 @@
 								>First name</label
 							>
 							<input
+								bind:value={first_name}
 								type="text"
 								name="first-name"
 								id="first-name"
@@ -99,6 +247,7 @@
 								>Last name</label
 							>
 							<input
+								bind:value={last_name}
 								type="text"
 								name="last-name"
 								id="last-name"
@@ -125,6 +274,7 @@
 						<div class="col-span-6 sm:col-span-3">
 							<label for="country" class="block text-sm font-medium text-gray-700">Country</label>
 							<select
+								bind:value={country}
 								id="country"
 								name="country"
 								autocomplete="country-name"
@@ -141,6 +291,7 @@
 								>Street address</label
 							>
 							<input
+								bind:value={address}
 								type="text"
 								name="street-address"
 								id="street-address"
@@ -152,6 +303,7 @@
 						<div class="col-span-6 sm:col-span-6 lg:col-span-2">
 							<label for="city" class="block text-sm font-medium text-gray-700">City</label>
 							<input
+								bind:value={city}
 								type="text"
 								name="city"
 								id="city"
@@ -165,6 +317,7 @@
 								>State / Province</label
 							>
 							<input
+								bind:value={state}
 								type="text"
 								name="region"
 								id="region"
@@ -178,6 +331,7 @@
 								>ZIP / Postal code</label
 							>
 							<input
+								bind:value={zip}
 								type="text"
 								name="postal-code"
 								id="postal-code"
@@ -186,40 +340,6 @@
 							/>
 						</div>
 						<!-- add an input for entering the preferred price-->
-						<div>
-							<label for="price" class="block text-sm font-medium text-gray-700"
-								>Preferred Price</label
-							>
-							<div class="mt-1 relative rounded-md shadow-sm">
-								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-									<span class="text-gray-500 sm:text-sm"> $ </span>
-								</div>
-								<input
-									type="text"
-									name="price"
-									id="price"
-									class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-									placeholder="0.00"
-									aria-describedby="price-currency"
-								/>
-								<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-									<span class="text-gray-500 sm:text-sm" id="price-currency"> USD </span>
-								</div>
-							</div>
-						</div>
-						<!-- add date selection for preffered completion date-->
-						<div class="col-span-6 sm:col-span-3 lg:col-span-2">
-							<label for="date" class="block text-sm font-medium text-gray-700"
-								>Preferred Completion Date</label
-							>
-							<input
-								type="date"
-								name="date"
-								id="date"
-								autocomplete="date"
-								class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-							/>
-						</div>
 					</div>
 				</form>
 			</div>
@@ -290,11 +410,13 @@
 
 	<div class="flex justify-end">
 		<button
+			on:click={handleCancel}
 			type="button"
 			class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 			>Cancel</button
 		>
 		<button
+			on:click={handleSave}
 			type="submit"
 			class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 			>Save</button

@@ -1,7 +1,7 @@
 import { supabase } from '$lib/supabaseClient';
 import { getCurrentUserID } from '$lib/auth';
 import { browser } from '$app/environment';
-import { userSession } from '../../stores/userSession';
+import { userSession } from '../../../stores/userSession';
 import { get } from 'svelte/store';
 import { redirect } from '@sveltejs/kit';
 

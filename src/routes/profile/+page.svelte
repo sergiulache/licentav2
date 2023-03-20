@@ -1,11 +1,45 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { supabase } from '$lib/supabaseClient';
+	import ModalSuccessProfile from '../../components/modalSuccessProfile.svelte';
 	export let data;
+	//console.log('data in profile page: ', data.profileData);
 
-	// for each field in data, if it is not null, set the value of the input to the value of the field, otherwise set it to an empty string
-	let username = data.username ? data.username : '';
-	let email = data.email ? data.email : '';
-	let first_name = data.first_name ? data.first_name : '';
+	// if no data, field is null
+	let username = data.profileData.username ? data.profileData.username : '';
+	let about = data.profileData.about ? data.profileData.about : '';
+	let first_name = data.profileData.first_name ? data.profileData.first_name : '';
+	let last_name = data.profileData.last_name ? data.profileData.last_name : '';
+	let country = data.profileData.country ? data.profileData.country : '';
+	let address = data.profileData.address ? data.profileData.address : '';
+	let city = data.profileData.city ? data.profileData.city : '';
+	let state = data.profileData.state ? data.profileData.state : '';
+	let zip = data.profileData.zip ? data.profileData.zip : '';
+
+	let showModal = false;
+
+	function handleCancel() {
+		goto('/auctions');
+	}
+
+	async function handleSave() {
+		let userID = data.profileData.user_id;
+		// update supabase user table with new data, for this user ID
+		const { dataUpdate, error } = await supabase
+			.from('users')
+			.update({ username, about, first_name, last_name, country, address, city, state, zip })
+			.eq('user_id', userID)
+			.select();
+
+		if (error != null) {
+			console.log('error: ', error);
+		} else {
+			showModal = true;
+		}
+	}
 </script>
+
+<ModalSuccessProfile show={showModal} />
 
 <form class="space-y-8 divide-y divide-gray-200 p-5 ml-64 sm:ml-64">
 	<div class="space-y-8 divide-y divide-gray-200 sm:space-y-5 border-2 border-gray rounded-xl p-3">
@@ -27,6 +61,7 @@
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<div class="max-w-lg flex rounded-md shadow-sm">
 							<input
+								bind:value={username}
 								type="text"
 								name="username"
 								id="username"
@@ -45,6 +80,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<textarea
+							bind:value={about}
 							id="about"
 							name="about"
 							rows="3"
@@ -72,6 +108,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={first_name}
 							type="text"
 							name="first-name"
 							id="first-name"
@@ -89,6 +126,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={last_name}
 							type="text"
 							name="last-name"
 							id="last-name"
@@ -106,6 +144,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<select
+							bind:value={country}
 							id="country"
 							name="country"
 							autocomplete="country-name"
@@ -129,6 +168,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={address}
 							type="text"
 							name="street-address"
 							id="street-address"
@@ -146,6 +186,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={city}
 							type="text"
 							name="city"
 							id="city"
@@ -163,6 +204,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={state}
 							type="text"
 							name="region"
 							id="region"
@@ -180,6 +222,7 @@
 					</label>
 					<div class="mt-1 sm:mt-0 sm:col-span-2">
 						<input
+							bind:value={zip}
 							type="text"
 							name="postal-code"
 							id="postal-code"
@@ -194,11 +237,13 @@
 	<div class="pt-5">
 		<div class="flex justify-end">
 			<button
+				on:click={handleCancel}
 				type="button"
 				class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 				>Cancel</button
 			>
 			<button
+				on:click={handleSave}
 				type="submit"
 				class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 				>Save</button
