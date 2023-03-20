@@ -4,7 +4,7 @@
 
 <div class="grid grid-cols-2 gap-4 mb-4">
 	{#each data as item}
-		<a href="/auctions/{item.id}">
+		<a href="/auctions/{item.item_id}">
 			<div
 				class="flex items-center justify-center flex-col  bg-gray-50 h-28 dark:bg-gray-800 rounded-2xl border-2 border-gray-400 border-dotted hover:border-gray-500 hover:border-solid dark:border-gray-500 dark:hover:border-gray-400"
 			>

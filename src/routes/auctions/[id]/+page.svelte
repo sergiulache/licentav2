@@ -7,7 +7,7 @@
 		<h1>Items:</h1>
 		<ul>
 			{#each data.items as item}
-				<li>{item.name}: {item.description}</li>
+				<li>{item.title}: {item.description}</li>
 			{/each}
 		</ul>
 	</div>
