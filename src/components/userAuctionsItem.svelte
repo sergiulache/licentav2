@@ -1,11 +1,5 @@
 <script>
 	export let data;
-
-	console.log({
-		'expiration date: ': new Date(data.expiration_date),
-		'current date: ': new Date(),
-		'is expired: ': new Date(data.expiration_date) < new Date()
-	});
 </script>
 
 <tr>

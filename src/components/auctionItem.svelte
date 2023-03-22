@@ -30,7 +30,13 @@
 								</p>
 							{:else}
 								<p>
-									Current bid: <span class="font-medium text-indigo-500">${data.current_bid}</span>
+									Current bid: <span class="font-medium text-indigo-500"
+										>${data.current_bid.toLocaleString('en-US', {
+											style: 'decimal',
+											minimumFractionDigits: 2,
+											maximumFractionDigits: 2
+										})}</span
+									>
 								</p>
 							{/if}
 						</div>
@@ -38,6 +44,19 @@
 				</div>
 			</div>
 			<div class="ml-5 flex-shrink-0">
+				{#if new Date(data.expiration_date) < new Date()}
+					<span
+						class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+					>
+						Closed
+					</span>
+				{:else}
+					<span
+						class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+					>
+						Active
+					</span>
+				{/if}
 				<i class="fa-solid fa-caret-right fa-lg text-gray-400" />
 			</div>
 		</div>
