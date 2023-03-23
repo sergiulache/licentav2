@@ -16,7 +16,7 @@
 							<i class="fa-solid fa-calendar-days fa-lg pr-2 text-gray-400 " />
 							<p>
 								Closing on
-								<time datetime="2020-01-07">{data.expiration_date}</time>
+								<time datetime={data.expiration_date}>{data.expiration_date}</time>
 							</p>
 						</div>
 					</div>

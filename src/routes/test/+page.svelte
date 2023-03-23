@@ -1,13 +1,7 @@
-<!-- This example requires Tailwind CSS v2.0+ -->
 <script>
-	import { goto } from '$app/navigation';
-	import UserAuctionsList from '../../components/userAuctionsList.svelte';
-
-	function handleNewAuction() {
-		goto('/auctions/new');
-	}
+	import AuctionDetailsFull from '../../components/auctionDetailsFull.svelte';
 
 	export let data;
 </script>
 
-<UserAuctionsList {data} />
+<AuctionDetailsFull {data} />
