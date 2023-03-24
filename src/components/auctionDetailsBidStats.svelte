@@ -1,4 +1,5 @@
 <script>
+	import { bidsStore } from '../stores/bidsStore';
 	export let data;
 
 	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
@@ -11,6 +12,15 @@
 		if (bid.bid_amount > highestBid) {
 			// set highestBid to bid.amount
 			highestBid = bid.bid_amount;
+		}
+	});
+
+	let bidChanges = $bidsStore;
+	bidsStore.subscribe((value) => {
+		bidChanges = value;
+		if (bidChanges && bidChanges.new && bidChanges.new.bid_amount > highestBid) {
+			highestBid = bidChanges.new.bid_amount;
+			bidCount += 1;
 		}
 	});
 </script>

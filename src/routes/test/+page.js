@@ -4,6 +4,7 @@ import { isAuthenticated } from '$lib/auth';
 import { userSession } from '../../stores/userSession';
 import { getCurrentUserID } from '$lib/auth';
 import { get } from 'svelte/store';
+import { browser } from '$app/environment';
 
 export async function load() {
 	// select auction data from supabase where item_id = 0de4fb43-0915-4113-8ab0-bbdf3dc4a7a9
@@ -30,9 +31,17 @@ export async function load() {
 			reviews.map((review) => review.reviewer_id)
 		);
 
-	//console.log('reviewerNames', reviewerNames);
-
-	// add reviewerNames to reviews
+	// subscribe to realtime opeations on the bids table
+	/*
+	if (browser) {
+		const bidsChanges = supabase
+			.channel('custom-all-channel')
+			.on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, (payload) => {
+				console.log('Change received in page.js!', payload);
+			})
+			.subscribe();
+	}
+	*/
 
 	reviews.forEach((review, index) => {
 		//console.log('index', index);

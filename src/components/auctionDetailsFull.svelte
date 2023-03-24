@@ -9,6 +9,7 @@
 	import { browser } from '$app/environment';
 	import ModalSuccessAuction from './modalSuccessAuction.svelte';
 	import ModalNewBid from './modalNewBid.svelte';
+	import { bidsStore } from '../stores/bidsStore';
 
 	export let data;
 
