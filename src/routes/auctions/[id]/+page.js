@@ -1,10 +1,6 @@
 import { supabase } from '$lib/supabaseClient';
-import { redirect } from '@sveltejs/kit';
-import { isAuthenticated } from '$lib/auth';
-import { userSession } from '../../../stores/userSession';
-import { getCurrentUserID } from '$lib/auth';
-import { get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 
 export async function load({ params }) {
 	// select auction data from supabase where item_id = 0de4fb43-0915-4113-8ab0-bbdf3dc4a7a9
@@ -35,24 +31,16 @@ export async function load({ params }) {
 		.select('expiration_date')
 		.eq('item_id', data[0].item_id);
 
-	// subscribe to realtime opeations on the bids table
-	/*
-	if (browser) {
-		const bidsChanges = supabase
-			.channel('custom-all-channel')
-			.on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, (payload) => {
-				console.log('Change received in page.js!', payload);
-			})
-			.subscribe();
-	}
-	*/
-
 	reviews.forEach((review, index) => {
 		//console.log('index', index);
 		review.reviewer_name = reviewerNames[index].first_name;
 	});
 
-	//console.log('reviews', reviews);
+	if (browser) {
+		$: {
+			goto(`/auctions/${params.id}`);
+		}
+	}
 
 	// return data[0] and sellerReviews
 	return { props: { data: data[0], sellerReviews: reviews, bids, expirationDate: expirationDate } };

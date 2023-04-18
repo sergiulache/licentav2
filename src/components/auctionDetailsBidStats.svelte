@@ -5,10 +5,7 @@
 	import { browser } from '$app/environment';
 	export let data;
 
-	let currentUser = $userSession;
-	userSession.subscribe((value) => {
-		if (browser) currentUser = value.user.id;
-	});
+	let currentHighestBidderId = 0;
 
 	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
 
@@ -21,7 +18,6 @@
 		if (bid.bid_amount > highestBid) {
 			// set highestBid to bid.amount
 			highestBid = bid.bid_amount;
-			highestBidItemId = bid.item_id;
 		}
 	});
 
@@ -35,7 +31,7 @@
 	}
 
 	async function modifyCurrentBidHolderInItemsTable(user_id, item_id) {
-		const { dataNewBid, error } = await supabase
+		const { dataNewBidder, error } = await supabase
 			.from('items')
 			.update({ bid_holder: user_id })
 			.eq('item_id', item_id)
@@ -47,9 +43,11 @@
 		bidChanges = value;
 		if (bidChanges && bidChanges.new && bidChanges.new.bid_amount > highestBid) {
 			highestBid = bidChanges.new.bid_amount;
-			bidCount += 1;
+			currentHighestBidderId = bidChanges.new.bidder_id;
+			highestBidItemId = bidChanges.new.item_id;
 			modifyHighestBidInItemsTable(highestBid, highestBidItemId);
-			modifyCurrentBidHolderInItemsTable(currentUser, highestBidItemId);
+			modifyCurrentBidHolderInItemsTable(currentHighestBidderId, highestBidItemId);
+			bidCount += 1;
 		}
 	});
 </script>
