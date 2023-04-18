@@ -10,6 +10,7 @@
 	import ModalSuccessAuction from './modalSuccessAuction.svelte';
 	import ModalNewBid from './modalNewBid.svelte';
 	import { bidsStore } from '../stores/bidsStore';
+	import NotificationBidCreateSuccess from './notificationBidCreateSuccess.svelte';
 
 	export let data;
 
@@ -17,6 +18,7 @@
 	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.data.item_id));
 
 	let showModal = false;
+	let showNotification = false;
 
 	let newBid = false;
 	let bid_amount;
@@ -63,7 +65,11 @@
 
 		if (!error) {
 			//console.log('bid added');
-			showModal = true;
+			showNotification = true;
+			// wait 5 seconds and then hide the modal
+			setTimeout(() => {
+				showNotification = false;
+			}, 5000);
 		} else {
 			console.log('error adding bid');
 		}
@@ -74,7 +80,11 @@
 	}
 </script>
 
-<ModalNewBid show={showModal} />
+{#if showNotification}
+	<div transition:fade={{ duration: 1000 }}>
+		<NotificationBidCreateSuccess />
+	</div>
+{/if}
 
 <div class="bg-white p-4 sm:ml-32">
 	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8">

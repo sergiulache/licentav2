@@ -6,6 +6,10 @@
 		show = false;
 		goto('/browse');
 	}
+
+	function stayOnPage() {
+		show = false;
+	}
 </script>
 
 <div
@@ -80,6 +84,14 @@
 					type="button"
 					class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
 					>Go back to listings</button
+				>
+			</div>
+			<div class="mt-5 sm:mt-6">
+				<button
+					on:click={stayOnPage}
+					type="button"
+					class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+					>Stay on the current page</button
 				>
 			</div>
 		</div>

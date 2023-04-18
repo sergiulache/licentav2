@@ -1,41 +1,53 @@
-import { error } from '@sveltejs/kit';
 import { supabase } from '$lib/supabaseClient';
-import { getCurrentUserID, isAuthenticated } from '$lib/auth';
-import { goto } from '$app/navigation';
 import { redirect } from '@sveltejs/kit';
+import { isAuthenticated } from '$lib/auth';
 import { userSession } from '../../../stores/userSession';
+import { getCurrentUserID } from '$lib/auth';
 import { get } from 'svelte/store';
 import { browser } from '$app/environment';
 
-//export const ssr = false;
-
-async function verifyId(id) {
-	const { data } = await supabase.from('items').select();
-	const ids = data.map((item) => item.item_id);
-
-	if (ids.includes(id)) {
-		console.log('id is valid');
-		return true;
-	}
-	console.log('id is invalid');
-	return false;
-}
-
 export async function load({ params }) {
-	let validId = await verifyId(params.id);
-	console.log(validId);
+	// select auction data from supabase where item_id = 0de4fb43-0915-4113-8ab0-bbdf3dc4a7a9
+	console.log('current item id', params.id);
+	const { data, error } = await supabase.from('items').select().eq('item_id', params.id);
 
-	// select all items where poster_Id = userID
-	const { data, error } = await supabase.from('items').select();
+	// select all bids from bids table where item_id = data[0].item_id
+	const { data: bids } = await supabase.from('bids').select().eq('item_id', data[0].item_id);
 
-	// filter so that only the items with the id = params.id are left
-	const filteredData = data.filter((item) => item.item_id == params.id);
-	console.log('filteredData         ' + filteredData);
+	// select everything from the reviews table where reviewed_id = poster_id from the items table
+	const { data: reviews } = await supabase
+		.from('reviews')
+		.select()
+		.eq('reviewed_id', data[0].poster_id);
 
-	// return the filtered data
-	if (validId) {
-		return {
-			items: filteredData ?? []
-		};
+	// select ALL first_name from users table where user_id = reviewer_id from reviews table
+	const { data: reviewerNames } = await supabase
+		.from('users')
+		.select('first_name')
+		.in(
+			'user_id',
+			reviews.map((review) => review.reviewer_id)
+		);
+
+	// subscribe to realtime opeations on the bids table
+	/*
+	if (browser) {
+		const bidsChanges = supabase
+			.channel('custom-all-channel')
+			.on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, (payload) => {
+				console.log('Change received in page.js!', payload);
+			})
+			.subscribe();
 	}
+	*/
+
+	reviews.forEach((review, index) => {
+		//console.log('index', index);
+		review.reviewer_name = reviewerNames[index].first_name;
+	});
+
+	//console.log('reviews', reviews);
+
+	// return data[0] and sellerReviews
+	return { props: { data: data[0], sellerReviews: reviews, bids } };
 }

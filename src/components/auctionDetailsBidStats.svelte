@@ -1,19 +1,31 @@
 <script>
 	import { bidsStore } from '../stores/bidsStore';
+	import { supabase } from '$lib/supabaseClient';
 	export let data;
 
 	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
 
 	let bidCount = data.props.bids.length;
 	let highestBid = 0;
+	let highestBidItemId = 0;
 	// for each bid in data.props.bids
 	data.props.bids.forEach((bid) => {
 		// if bid.amount > highestBid
 		if (bid.bid_amount > highestBid) {
 			// set highestBid to bid.amount
 			highestBid = bid.bid_amount;
+			highestBidItemId = bid.item_id;
 		}
 	});
+
+	// modify current bid in Items to be highestBid
+	async function modifyHighestBidInItemsTable(highestBid, item_id) {
+		const { dataNewBid, error } = await supabase
+			.from('items')
+			.update({ current_bid: highestBid })
+			.eq('item_id', item_id)
+			.single();
+	}
 
 	let bidChanges = $bidsStore;
 	bidsStore.subscribe((value) => {
@@ -21,6 +33,7 @@
 		if (bidChanges && bidChanges.new && bidChanges.new.bid_amount > highestBid) {
 			highestBid = bidChanges.new.bid_amount;
 			bidCount += 1;
+			modifyHighestBidInItemsTable(highestBid, highestBidItemId);
 		}
 	});
 </script>
