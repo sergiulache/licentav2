@@ -19,6 +19,11 @@
 
 	let showModal = false;
 	let showNotification = false;
+	let validExpirationDate = false;
+
+	if (new Date(data.props.data.expiration_date) > new Date()) {
+		validExpirationDate = true;
+	}
 
 	let newBid = false;
 	let bid_amount;
@@ -135,14 +140,14 @@
 				</div>
 
 				<div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-					{#if !newBid}
+					{#if !newBid && validExpirationDate}
 						<button
 							on:click={handleBid}
 							type="button"
 							class="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
 							>New bid</button
 						>
-					{:else}
+					{:else if newBid && validExpirationDate}
 						<button
 							transition:fade={{ duration: 2000 }}
 							on:click={handleConfirmBid}
@@ -161,7 +166,7 @@
 				</div>
 
 				<!-- add a form that slides down when the button is pressed for confirming the bid details-->
-				{#if newBid}
+				{#if newBid && validExpirationDate}
 					<div transition:slide={{ duration: 2000 }}>
 						<form class="mt-10">
 							<div>
@@ -224,6 +229,10 @@
 								</div>
 							</div>
 						</form>
+					</div>
+				{:else if !validExpirationDate}
+					<div class="mt-10">
+						<p class="text-red-500">The expiration date for this auction has passed.</p>
 					</div>
 				{/if}
 

@@ -29,6 +29,12 @@ export async function load({ params }) {
 			reviews.map((review) => review.reviewer_id)
 		);
 
+	// select expiration date from items table wher item_id is the same as the item_id from the bids table
+	const { data: expirationDate } = await supabase
+		.from('items')
+		.select('expiration_date')
+		.eq('item_id', data[0].item_id);
+
 	// subscribe to realtime opeations on the bids table
 	/*
 	if (browser) {
@@ -49,5 +55,5 @@ export async function load({ params }) {
 	//console.log('reviews', reviews);
 
 	// return data[0] and sellerReviews
-	return { props: { data: data[0], sellerReviews: reviews, bids } };
+	return { props: { data: data[0], sellerReviews: reviews, bids, expirationDate: expirationDate } };
 }

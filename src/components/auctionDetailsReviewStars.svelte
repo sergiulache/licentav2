@@ -2,8 +2,8 @@
 	export let data;
 
 	// console log jsonified data
-	console.log('data from auctionDetailsReviewStars.svelte');
-	console.log(JSON.stringify(data));
+	//console.log('data from auctionDetailsReviewStars.svelte');
+	//console.log(JSON.stringify(data));
 </script>
 
 <div class="flex items-center mt-4">

@@ -1,7 +1,14 @@
 <script>
 	import { bidsStore } from '../stores/bidsStore';
 	import { supabase } from '$lib/supabaseClient';
+	import { userSession } from '../stores/userSession';
+	import { browser } from '$app/environment';
 	export let data;
+
+	let currentUser = $userSession;
+	userSession.subscribe((value) => {
+		if (browser) currentUser = value.user.id;
+	});
 
 	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
 
@@ -27,6 +34,14 @@
 			.single();
 	}
 
+	async function modifyCurrentBidHolderInItemsTable(user_id, item_id) {
+		const { dataNewBid, error } = await supabase
+			.from('items')
+			.update({ bid_holder: user_id })
+			.eq('item_id', item_id)
+			.single();
+	}
+
 	let bidChanges = $bidsStore;
 	bidsStore.subscribe((value) => {
 		bidChanges = value;
@@ -34,6 +49,7 @@
 			highestBid = bidChanges.new.bid_amount;
 			bidCount += 1;
 			modifyHighestBidInItemsTable(highestBid, highestBidItemId);
+			modifyCurrentBidHolderInItemsTable(currentUser, highestBidItemId);
 		}
 	});
 </script>
