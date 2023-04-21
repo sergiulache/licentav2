@@ -4,8 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler
+
 
 
 # server start command: uvicorn main:app --reload
@@ -23,92 +28,185 @@ app.add_middleware(
 
 import random
 
-num_samples = 1000
+np.random.seed(41)
 
-# Generate random data
-bid_amounts = np.random.randint(50, 2000, size=num_samples)
-completion_date_diffs = np.random.randint(-30, 30, size=num_samples)
-buyer_ratings = np.random.uniform(0, 5, size=num_samples)
-past_jobs = np.random.randint(0, 100, size=num_samples)
-account_ages = np.random.randint(0, 365, size=num_samples)
-job_durations = np.random.randint(1, 30, size=num_samples)
-distances = np.random.randint(1, 1000, size=num_samples)
+def generate_data(n_groups, candidates_per_group, weights):
+    num_samples = n_groups * candidates_per_group
 
-# Create a pandas DataFrame
-data = pd.DataFrame({
-    'bid_amount': bid_amounts,
-    'completion_date_diff': completion_date_diffs,
-    'buyer_rating': buyer_ratings,
-    'past_jobs': past_jobs,
-    'account_age': account_ages,
-    'job_duration': job_durations,
-    'distance': distances
-})
+    # Generate random data
+    bid_amounts = np.random.randint(1000, 2000, size=num_samples)
+    completion_date_diffs = np.random.randint(-30, 30, size=num_samples)
+    buyer_ratings = np.random.randint(0, 6, size=num_samples)
+    past_jobs = np.random.randint(0, 100, size=num_samples)
+    account_ages = np.random.randint(0, 365, size=num_samples)
+    job_durations = np.random.randint(1, 30, size=num_samples)
+    distances = np.random.randint(1, 1000, size=num_samples)
 
+    # Create a MinMaxScaler
+    scaler = MinMaxScaler()
+    # Scale the features
+    bid_amounts_scaled = scaler.fit_transform(bid_amounts.reshape(-1, 1)).flatten()
+    completion_date_diffs_scaled = scaler.fit_transform(completion_date_diffs.reshape(-1, 1)).flatten()
+    buyer_ratings_scaled = scaler.fit_transform(buyer_ratings.reshape(-1, 1)).flatten()
+    past_jobs_scaled = scaler.fit_transform(past_jobs.reshape(-1, 1)).flatten()
+    account_ages_scaled = scaler.fit_transform(account_ages.reshape(-1, 1)).flatten()
+    job_durations_scaled = scaler.fit_transform(job_durations.reshape(-1, 1)).flatten()
+    distances_scaled = scaler.fit_transform(distances.reshape(-1, 1)).flatten()
+
+    # Apply weights to each feature
+    weighted_bid_amounts = bid_amounts_scaled * weights['bid_amount']
+    weighted_completion_date_diffs = completion_date_diffs_scaled * weights['completion_date_diff']
+    weighted_buyer_ratings = buyer_ratings_scaled * weights['buyer_rating']
+    weighted_past_jobs = past_jobs_scaled * weights['past_jobs']
+    weighted_account_ages = account_ages_scaled * weights['account_age']
+    weighted_job_durations = job_durations_scaled * weights['job_duration']
+    weighted_distances = distances_scaled * weights['distance']
+
+    # Calculate the scores based on the weighted features
+    scores = (weighted_bid_amounts + weighted_completion_date_diffs + 
+            weighted_buyer_ratings + weighted_past_jobs +
+            weighted_account_ages + weighted_job_durations +
+            weighted_distances)
+    
+    score_shift = np.abs(np.min(scores)) + 1
+    scores += score_shift
+
+    group_id = np.repeat(np.arange(n_groups), candidates_per_group)
+    candidate_id = np.arange(num_samples)
+
+    # Create a pandas DataFrame
+    data = pd.DataFrame({
+        'group_id': group_id,
+        'candidate_id': candidate_id,
+        'bid_amount': bid_amounts,
+        'completion_date_diff': completion_date_diffs,
+        'buyer_rating': buyer_ratings,
+        'past_jobs': past_jobs,
+        'account_age': account_ages,
+        'job_duration': job_durations,
+        'distance': distances,
+        'score': scores
+    })
+
+    # Assign winners based on the highest score in each group
+    data['is_winner'] = 0
+    winners_idx = data.groupby('group_id')['score'].idxmax()
+    data.loc[winners_idx, 'is_winner'] = 1
+
+    return data
+
+# Set the weights for each feature based on their priorities
+"""
+weights = {
+    'bid_amount': -1,
+    'completion_date_diff': -1,
+    'buyer_rating': 1,
+    'past_jobs': 1,
+    'account_age': 0,
+    'job_duration': -1,
+    'distance': 0
+}
+"""
+
+weights = {
+    'bid_amount': -7,
+    'completion_date_diff': -2,
+    'buyer_rating': 4,
+    'past_jobs': 2,
+    'account_age': 0.1,
+    'job_duration': -1,
+    'distance': 0.1
+}
+
+
+n_groups = 1000
+candidates_per_group = 10
+num_samples = n_groups * candidates_per_group
+
+# Generate the dataset
+data = generate_data(n_groups, candidates_per_group, weights)
+
+# save the data to a csv file
+data.to_csv('fresh_data_1k.csv', index=False)
 
 # Generate target variable (e.g., whether a buyer wins or loses the auction)
 # This can be randomly generated for now, but in a real use case, you'll need actual labels
 labels = np.random.randint(0, 2, size=num_samples)
 
-#Split the data into training and testing sets:
-X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+# Create a GroupShuffleSplit object
+group_split = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 
-# Standardize the data
+# Split the data into training and testing sets
+train_idx, test_idx = next(group_split.split(data, groups=data['group_id']))
+train_data = data.iloc[train_idx]
+test_data = data.iloc[test_idx]
+
+# Separate features and target variable for training and testing sets
+X_train = train_data.drop(['group_id', 'candidate_id', 'is_winner'], axis=1)
+y_train = train_data['is_winner']
+X_test = test_data.drop(['group_id', 'candidate_id', 'is_winner'], axis=1)
+y_test = test_data['is_winner']
+
+# Standardize the features
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
-# Train the AI model. In this example, we use Logistic Regression, but you can try other models
-model = LogisticRegression()
-model.fit(X_train, y_train)
+# Logistic regression
+#model = LogisticRegression(random_state=42)
+#model.fit(X_train_scaled, y_train)
+
+# Train the model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train_scaled, y_train)
+
+
+
+# Make predictions on the test set
+y_pred = model.predict(X_test_scaled)
 
 # Evaluate the model
-accuracy = model.score(X_test, y_test)
-print(f"Model accuracy: {accuracy}")
+#print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
+#print(classification_report(y_test, y_pred))
+
 
 # Use the model to predict the winner
-# Replace the values with your actual data from the Svelte app
-new_data = pd.DataFrame({
-    'bid_amount': [1000],
-    'completion_date_diff': [10],
-    'buyer_rating': [4.5],
-    'past_jobs': [50],
-    'account_age': [200],
-    'job_duration': [14],
-    'distance': [300]
-})
-
-# Standardize the new data
-new_data_scaled = scaler.transform(new_data)
-
-# Generate 5 candidates
-num_candidates = 5
+# Generate new data for prediction
+n_new_groups = 100
+candidates_per_group = 10
+num_new_samples = n_new_groups * candidates_per_group
 
 # Generate random data
-bid_amounts = np.random.randint(50, 2000, size=num_candidates)
-completion_date_diffs = np.random.randint(-30, 30, size=num_candidates)
-buyer_ratings = np.random.uniform(0, 5, size=num_candidates)
-past_jobs = np.random.randint(0, 100, size=num_candidates)
-account_ages = np.random.randint(0, 365, size=num_candidates)
-job_durations = np.random.randint(1, 30, size=num_candidates)
-distances = np.random.randint(1, 1000, size=num_candidates)
+new_data = generate_data(n_new_groups, candidates_per_group, weights)
+# add a candidate to the new data in the last group with bid amount 1000 and rating 1, the rest random
+new_data.loc[new_data['group_id'] == new_data['group_id'].max(), 'bid_amount'] = 1000
 
-# Create a pandas DataFrame
-candidates_data = pd.DataFrame({
-    'bid_amount': bid_amounts,
-    'completion_date_diff': completion_date_diffs,
-    'buyer_rating': buyer_ratings,
-    'past_jobs': past_jobs,
-    'account_age': account_ages,
-    'job_duration': job_durations,
-    'distance': distances
-})
+# Standardize the new data
+# Standardize the new data
+new_X = new_data[X_train.columns]
+new_X_scaled = scaler.transform(new_X)
 
-print(candidates_data)
 
-# Make a prediction
-prediction = model.predict(candidates_data)
-print(f"Predicted winner: {prediction[0]}")
+
+# Make predictions on the new data
+new_y_pred = model.predict_proba(new_X_scaled)
+
+# Add the winning probabilities to the DataFrame
+# Get the max probability for each group
+new_data['score_difference_scaled'] = ((new_data.groupby('group_id')['score'].transform(max) - new_data['score']) ** 2).round(2) * 10
+
+
+
+
+
+# Save new_data to csv
+new_data.to_csv('new_data.csv', index=False)
+
+# Find the winners for each group
+winners = new_data.loc[new_data.groupby('group_id')['score'].idxmax()]
+winners = winners[['group_id', 'candidate_id', 'score']]
+print("\n\nPrinting winners:\n\n")
+print(winners)
 
 
 @app.post("/calculate_winner")
