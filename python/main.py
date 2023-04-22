@@ -124,14 +124,19 @@ candidates_per_group = 10
 num_samples = n_groups * candidates_per_group
 
 # Generate the dataset
-data = generate_data(n_groups, candidates_per_group, weights)
+# data = generate_data(n_groups, candidates_per_group, weights)
+# data.to_csv('fresh_data_1k.csv', index=False)
+#
+#
+#
 
-# save the data to a csv file
-data.to_csv('fresh_data_1k.csv', index=False)
+# Import data from training_data.csv
 
-# Generate target variable (e.g., whether a buyer wins or loses the auction)
-# This can be randomly generated for now, but in a real use case, you'll need actual labels
-labels = np.random.randint(0, 2, size=num_samples)
+# Read the training_data.csv file
+data = pd.read_csv('training_data.csv')
+
+# Generate target variable (is_winner)
+labels = data['is_winner'].to_numpy()
 
 # Create a GroupShuffleSplit object
 group_split = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
@@ -152,23 +157,26 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Logistic regression
-#model = LogisticRegression(random_state=42)
-#model.fit(X_train_scaled, y_train)
-
 # Train the model
 model = RandomForestClassifier(random_state=42)
 model.fit(X_train_scaled, y_train)
 
-
-
 # Make predictions on the test set
 y_pred = model.predict(X_test_scaled)
 
-# Evaluate the model
-#print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
-#print(classification_report(y_test, y_pred))
+"""
+# Get the feature importances
+feature_importances = model.feature_importances_
 
+# Print the feature importances
+feature_names = X_train.columns
+for name, importance in zip(feature_names, feature_importances):
+    print(f"{name}: {importance}")
+
+# Evaluate the model
+print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
+#print(classification_report(y_test, y_pred))
+"""
 
 # Use the model to predict the winner
 # Generate new data for prediction
@@ -178,7 +186,7 @@ num_new_samples = n_new_groups * candidates_per_group
 
 # Generate random data
 new_data = generate_data(n_new_groups, candidates_per_group, weights)
-# add a candidate to the new data in the last group with bid amount 1000 and rating 1, the rest random
+# add a candidate to the new data in the last group with bid amount 1000, the rest random
 new_data.loc[new_data['group_id'] == new_data['group_id'].max(), 'bid_amount'] = 1000
 
 # Standardize the new data
@@ -214,7 +222,7 @@ async def calculate_winner(data: dict):
     # Implement your algorithm here
     # set winner equal to data
     winner = {}
-    winner["ane"] = data["data"].upper()
-    winner["pula"] = "pula"
+    winner["test1"] = data["data"].upper()
+    winner["test2"] = "test2"
 
     return {"winner": winner}
