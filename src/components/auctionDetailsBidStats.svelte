@@ -10,12 +10,12 @@
 	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
 
 	let bidCount = data.props.bids.length;
-	let highestBid = 0;
+	let highestBid = 100000;
 	let highestBidItemId = 0;
 	// for each bid in data.props.bids
 	data.props.bids.forEach((bid) => {
 		// if bid.amount > highestBid
-		if (bid.bid_amount > highestBid) {
+		if (bid.bid_amount < highestBid) {
 			// set highestBid to bid.amount
 			highestBid = bid.bid_amount;
 		}
@@ -41,7 +41,7 @@
 	let bidChanges = $bidsStore;
 	bidsStore.subscribe((value) => {
 		bidChanges = value;
-		if (bidChanges && bidChanges.new && bidChanges.new.bid_amount > highestBid) {
+		if (bidChanges && bidChanges.new && bidChanges.new.bid_amount < highestBid) {
 			highestBid = bidChanges.new.bid_amount;
 			currentHighestBidderId = bidChanges.new.bidder_id;
 			highestBidItemId = bidChanges.new.item_id;
