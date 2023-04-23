@@ -10,11 +10,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
 
 
 
 # server start command: uvicorn main:app --reload
-
+geolocator = Nominatim(user_agent="myGeocoder")
 app = FastAPI()
 
 app.add_middleware(
@@ -222,7 +224,25 @@ async def calculate_winner(data: dict):
     # Implement your algorithm here
     # set winner equal to data
     winner = {}
-    winner["test1"] = data["data"].upper()
+    #winner["test1"] = data["data"].upper()
     winner["test2"] = "test2"
+
+    bids = data["data"]
+
+    for bid in bids:
+        bidder_location = geolocator.geocode(f"{bid['city']}, {bid['country']}")
+        seller_location = geolocator.geocode(f"{bid['poster_city']}, {bid['poster_country']}")
+
+        distance = geodesic((bidder_location.latitude, bidder_location.longitude), (seller_location.latitude, seller_location.longitude)).km
+
+        print(f"Distance between {bid['city']} and {bid['poster_city']} is {distance:.2f} km")
+        bid["distance"] = round(distance, 1)
+        # remove city, country, poster_city, poster_country
+        bid.pop("city", None)
+        bid.pop("country", None)
+        bid.pop("poster_city", None)
+        bid.pop("poster_country", None)
+    
+    print(bids)
 
     return {"winner": winner}
