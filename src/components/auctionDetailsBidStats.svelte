@@ -6,20 +6,29 @@
 	export let data;
 
 	let currentHighestBidderId = 0;
-
-	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
-
-	let bidCount = data.props.bids.length;
 	let highestBid = 100000;
 	let highestBidItemId = 0;
-	// for each bid in data.props.bids
-	data.props.bids.forEach((bid) => {
-		// if bid.amount > highestBid
-		if (bid.bid_amount < highestBid) {
-			// set highestBid to bid.amount
-			highestBid = bid.bid_amount;
-		}
-	});
+
+	console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
+	let bidCount = 0;
+	if (
+		data.props.bids &&
+		data.props.bids != null &&
+		data.props.bids != undefined &&
+		data.props.bids.length > 0
+	) {
+		bidCount = data.props.bids[0].length;
+
+		// for each bid in data.props.bids
+		data.props.bids[0].forEach((bid) => {
+			// if bid.amount > highestBid
+			//console.log('bid.bid_amount: ', bid.bid.bid_amount);
+			if (bid.bid.bid_amount < highestBid) {
+				// set highestBid to bid.amount
+				highestBid = bid.bid.bid_amount;
+			}
+		});
+	}
 
 	// modify current bid in Items to be highestBid
 	async function modifyHighestBidInItemsTable(highestBid, item_id) {
@@ -81,20 +90,26 @@
 				</div>
 				<p class="ml-16 text-sm font-medium text-gray-500 truncate">Current Bid</p>
 			</dt>
-			<dd class="ml-14 pb-6 flex flex-col items-baseline sm:pb-7">
-				<p class="text-xl font-semibold text-gray-900">
-					$ {highestBid.toLocaleString('en-US', {
-						style: 'decimal',
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					})}
-				</p>
-				<p class="ml-2 flex items-baseline text-sm font-semibold text-green-600 pt-1">
-					<i class="fa-solid fa-arrow-up text-green-500 pr-1" />
-					<span class="sr-only"> Increased by </span>
-					5.4%
-				</p>
-			</dd>
+			{#if highestBid !== 100000}
+				<dd class="ml-14 pb-6 flex flex-col items-baseline sm:pb-7">
+					<p class="text-xl font-semibold text-gray-900">
+						$ {highestBid.toLocaleString('en-US', {
+							style: 'decimal',
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2
+						})}
+					</p>
+					<p class="ml-2 flex items-baseline text-sm font-semibold text-green-600 pt-1">
+						<i class="fa-solid fa-arrow-up text-green-500 pr-1" />
+						<span class="sr-only"> Increased by </span>
+						5.4%
+					</p>
+				</dd>
+			{:else}
+				<dd class="ml-14 pb-6 flex flex-col items-baseline sm:pb-7">
+					<p class="text-xl font-semibold text-gray-900">No bids yet</p>
+				</dd>
+			{/if}
 		</div>
 	</dl>
 </div>

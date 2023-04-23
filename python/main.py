@@ -96,10 +96,14 @@ async def calculate_winner(data: dict):
     bids = data["data"]
 
     for bid in bids:
-        bidder_location = geolocator.geocode(f"{bid['city']}, {bid['country']}")
-        seller_location = geolocator.geocode(f"{bid['poster_city']}, {bid['poster_country']}")
+        bidder_location = geolocator.geocode(f"{bid['city']}")
+        seller_location = geolocator.geocode(f"{bid['poster_city']}")
 
-        distance = geodesic((bidder_location.latitude, bidder_location.longitude), (seller_location.latitude, seller_location.longitude)).km
+
+        if bidder_location is None or seller_location is None:
+            distance = 500
+        else: 
+            distance = geodesic((bidder_location.latitude, bidder_location.longitude), (seller_location.latitude, seller_location.longitude)).km
 
         print(f"Distance between {bid['city']} and {bid['poster_city']} is {distance:.2f} km")
         bid["distance"] = round(distance, 1)

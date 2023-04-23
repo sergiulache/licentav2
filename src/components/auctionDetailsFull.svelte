@@ -14,14 +14,14 @@
 
 	export let data;
 
-	// console log jsonified data
-	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.data.item_id));
+	// console log jsonified dat
+	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.data));
 
 	let showModal = false;
 	let showNotification = false;
 	let validExpirationDate = false;
 
-	if (new Date(data.props.data.expiration_date) > new Date()) {
+	if (new Date(data.props.data.item.expiration_date) > new Date()) {
 		validExpirationDate = true;
 	}
 
@@ -31,10 +31,12 @@
 	let bid_completion_time = 30;
 
 	let sum = 0;
-	data.props.sellerReviews.forEach((review) => {
-		//console.log(review.rating);
-		sum += review.rating;
-	});
+	if (data.props.data.sellerReviews) {
+		data.props.sellerReviews.forEach((reviewData) => {
+			//console.log(reviewData.review.rating);
+			sum += reviewData.review.rating;
+		});
+	}
 	let total_rating = sum / data.props.sellerReviews.length;
 	// round to nearest int
 	let rounded_rating = Math.round(total_rating);
@@ -54,7 +56,7 @@
 	}
 
 	async function handleConfirmBid() {
-		let itemID = data.props.data.item_id;
+		let itemID = data.props.data.item.item_id;
 
 		// add a new bid in supabase with the item id, bidder_id and bid amount
 		const { dataNewBid, error } = await supabase
@@ -106,12 +108,12 @@
 				<div class="flex flex-col-reverse">
 					<div class="mt-4">
 						<h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-							{data.props.data.title}
+							{data.props.data.item.title}
 						</h1>
 
 						<h2 id="information-heading" class="sr-only">Creation date</h2>
 						<p class="text-sm text-gray-500 mt-2">
-							Created on {new Date(data.props.data.created_at).toLocaleDateString()}
+							Created on {new Date(data.props.data.item.created_at).toLocaleDateString()}
 						</p>
 					</div>
 
@@ -133,7 +135,7 @@
 				</div>
 
 				<p class="text-gray-500 mt-6">
-					{data.props.data.description}
+					{data.props.data.item.description}
 				</p>
 
 				<!-- add section for showing current bid-->
@@ -260,13 +262,15 @@
 					<h3 class="text-sm font-medium text-gray-900">More details</h3>
 					<div class="mt-4 prose prose-sm text-gray-500">
 						<ul>
-							<li>Located in {data.props.data.poster_city}</li>
+							<li>Located in {data.props.data.item.poster_city}</li>
 
-							<li>Expires on {new Date(data.props.data.expiration_date).toLocaleDateString()}</li>
+							<li>
+								Expires on {new Date(data.props.data.item.expiration_date).toLocaleDateString()}
+							</li>
 
 							<li>
 								If possible, the job should be completed before {new Date(
-									data.props.data.preferred_date
+									data.props.data.item.preferred_date
 								).toLocaleDateString()}
 							</li>
 						</ul>
