@@ -18,13 +18,13 @@ np.random.seed(41)
 
 
 weights = {
-    'bid_amount': -7,
+    'bid_amount': -10,
     'completion_date_diff': -2,
-    'buyer_rating': 4,
-    'past_jobs': 2,
+    'buyer_rating': 5,
+    'past_jobs': 3,
     'account_age': 0.1,
     'job_duration': -1,
-    'distance': 0.1
+    'distance': -0.1
 }
 
 def generate_data(n_groups, candidates_per_group):

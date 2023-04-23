@@ -13,6 +13,8 @@ from sklearn.preprocessing import MinMaxScaler
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from helpers import generate_data, predict_winner_from_random_data
+import matplotlib.pyplot as plt
+import itertools
 
 
 
@@ -32,6 +34,7 @@ app.add_middleware(
 import random
 
 np.random.seed(41)
+
 
 # Import data from training_data.csv
 data = pd.read_csv('training_data.csv')
@@ -68,7 +71,7 @@ model.fit(X_train_scaled, y_train)
 # Make predictions on the test set
 y_pred = model.predict(X_test_scaled)
 
-"""
+
 # Get the feature importances
 feature_importances = model.feature_importances_
 
@@ -80,9 +83,11 @@ for name, importance in zip(feature_names, feature_importances):
 # Evaluate the model
 print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
 #print(classification_report(y_test, y_pred))
-"""
+
 
 predict_winner_from_random_data(100, 10, X_train, model)
+ 
+
 
 
 @app.post("/calculate_winner")
@@ -129,6 +134,10 @@ async def calculate_winner(data: dict):
     
     # get the winner's bidder_id
     winner["bidder_id"] = bids[winner_index]["bidder_id"]
+
+    # add the winning probabilities to the DataFrame, multiplied by 100 to get the percentage
+    bids_df["winning_probability"] = y_pred[:, 1] * 100
+
 
     # save bids_df to csv
     bids_df.to_csv("bids.csv", index=False)
