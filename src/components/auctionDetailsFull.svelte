@@ -28,6 +28,7 @@
 	let newBid = false;
 	let bid_amount;
 	let bid_completion_date = new Date();
+	let bid_completion_time = 30;
 
 	let sum = 0;
 	data.props.sellerReviews.forEach((review) => {
@@ -63,7 +64,8 @@
 					item_id: itemID,
 					bidder_id: currentUser,
 					bid_amount: bid_amount,
-					bid_completion_date: bid_completion_date
+					bid_completion_date: bid_completion_date,
+					bid_completion_time: bid_completion_time
 				}
 			])
 			.single();
@@ -210,6 +212,23 @@
 								<p class="mt-2 text-sm text-gray-500">
 									When do you predict the job will be complete?
 								</p>
+								<div class="mt-6">
+									<label for="about" class="block text-sm font-medium text-gray-700">
+										Predicted time to complete
+									</label>
+									<div class="mt-1">
+										<input
+											bind:value={bid_completion_time}
+											type="number"
+											name="about"
+											id="about"
+											class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border-gray-300 rounded-md"
+										/>
+									</div>
+									<p class="mt-2 text-sm text-gray-500">
+										How many days do you predict it will take to complete the job?
+									</p>
+								</div>
 
 								<div class="mt-6">
 									<label for="about" class="block text-sm font-medium text-gray-700">
@@ -228,6 +247,7 @@
 									</p>
 								</div>
 							</div>
+							<!-- section for entering a predicted amount of time it will take to complete the job -->
 						</form>
 					</div>
 				{:else if !validExpirationDate}

@@ -12,7 +12,6 @@ export async function load(page) {
 	console.log('error', error);
 
 	console.log('calculating winner');
-
 	return {
 		data: bids
 	};

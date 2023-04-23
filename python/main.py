@@ -237,11 +237,14 @@ async def calculate_winner(data: dict):
 
         print(f"Distance between {bid['city']} and {bid['poster_city']} is {distance:.2f} km")
         bid["distance"] = round(distance, 1)
+
+        bid["job_duration"] = bid["bid_completion_time"]
         # remove city, country, poster_city, poster_country
         bid.pop("city", None)
         bid.pop("country", None)
         bid.pop("poster_city", None)
         bid.pop("poster_country", None)
+        bid.pop("bid_completion_time", None)
     
     print(bids)
 
