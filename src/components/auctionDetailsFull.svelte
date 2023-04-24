@@ -11,11 +11,12 @@
 	import ModalNewBid from './modalNewBid.svelte';
 	import { bidsStore } from '../stores/bidsStore';
 	import NotificationBidCreateSuccess from './notificationBidCreateSuccess.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data;
 
 	// console log jsonified dat
-	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.data));
+	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
 
 	let showModal = false;
 	let showNotification = false;
@@ -31,7 +32,7 @@
 	let bid_completion_time = 30;
 
 	let sum = 0;
-	if (data.props.data.sellerReviews) {
+	if (data.props.sellerReviews) {
 		data.props.sellerReviews.forEach((reviewData) => {
 			//console.log(reviewData.review.rating);
 			sum += reviewData.review.rating;
@@ -40,6 +41,7 @@
 	let total_rating = sum / data.props.sellerReviews.length;
 	// round to nearest int
 	let rounded_rating = Math.round(total_rating);
+	//console.log('\n\n\n rounded rating');
 	//console.log(rounded_rating);
 
 	let roundedReviewsData = {
@@ -87,6 +89,12 @@
 	function handleContact() {
 		//console.log('handleContact');
 	}
+
+	function handleCalculateWinner() {
+		// goto the calculate winner page for this item
+		console.log('handleCalculateWinner');
+		goto(`${data.props.data.item.item_id}/calculate_winner/`);
+	}
 </script>
 
 {#if showNotification}
@@ -95,7 +103,7 @@
 	</div>
 {/if}
 
-<div class="bg-white p-4 sm:ml-32">
+<div class="bg-white p-4 sm:ml-64">
 	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8">
 		<!-- Product -->
 		<div class="lg:grid lg:grid-rows-1 lg:grid-cols-7 lg:gap-x-8 lg:gap-y-10 xl:gap-x-16">
@@ -156,7 +164,7 @@
 							transition:fade={{ duration: 2000 }}
 							on:click={handleConfirmBid}
 							type="button"
-							class="w-full bg-green-600 text-white hover:bg-green-700 hover:-translate-y-1 hover:scale-105 hover:border-green-400 border-b-4 rounded-lg duration-300 "
+							class="w-full py-3 px-8 flex items-center justify-center text-base bg-green-600 text-white hover:bg-green-700 hover:-translate-y-1 hover:scale-105 hover:border-green-400 border-b-4 rounded-lg duration-300 "
 							>Confirm Bid</button
 						>
 					{/if}
@@ -216,7 +224,7 @@
 								</p>
 								<div class="mt-6">
 									<label for="about" class="block text-sm font-medium text-gray-700">
-										Predicted time to complete
+										Predicted job duration
 									</label>
 									<div class="mt-1">
 										<input
@@ -317,8 +325,23 @@
 								<i class="fa-brands fa-twitter fa-lg" />
 							</a>
 						</li>
+						<li>
+							<a
+								href="/share/linkedin"
+								class="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-500"
+							>
+								<span class="sr-only">Share on Linkedin</span>
+								<i class="fa-brands fa-linkedin fa-lg" />
+							</a>
+						</li>
 					</ul>
 				</div>
+				<button
+					on:click={handleCalculateWinner}
+					type="button"
+					class="w-50 bg-indigo-50 border border-transparent rounded-md py-3 mt-8 px-8 flex items-center justify-center text-base font-medium text-green-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+					>Calculate Winner</button
+				>
 			</div>
 
 			<div class="w-full max-w-2xl mx-auto mt-16 lg:max-w-none lg:mt-0 lg:col-span-4">

@@ -2,10 +2,6 @@
 	import AuctionDetailsReviewStars from './auctionDetailsReviewStars.svelte';
 
 	export let data;
-
-	console.log(
-		'data from auctionDetailsReviewFull.svelte' + JSON.stringify(data.props.sellerReviews)
-	);
 </script>
 
 {#if data.props.sellerReviews[0].reviewer_name && data.props.sellerReviews.length > 0 && data.props.sellerReviews[0].reviewer_name != '' && data.props.sellerReviews}

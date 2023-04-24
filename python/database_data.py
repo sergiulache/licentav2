@@ -29,7 +29,7 @@ with open('cities.csv', newline='') as csvfile:
 
 # Generate and insert fake data for the users table
 user_ids = []
-for _ in range(50):  # Create 100 fake users
+for _ in range(30):  # Create 100 fake users
     user_id = uuid.uuid4()
     user_ids.append(user_id)
     first_name = fake.first_name()
@@ -56,7 +56,7 @@ for _ in range(50):  # Create 100 fake users
 
 # Generate and insert fake data for the items table
 item_ids = []
-for _ in range(1):  # Create 5 fake items
+for _ in range(10):  # Create 5 fake items
     item_id = uuid.uuid4()
     item_ids.append(item_id)
     title = fake.sentence(nb_words=4)
@@ -104,7 +104,7 @@ for _ in range(200):  # Create 20 fake bids
     )
 
 # Generate and insert fake data for the reviews table
-for _ in range(1):  # Create 30 fake reviews
+for _ in range(100):  # Create 30 fake reviews
     review_id = uuid.uuid4()
     reviewer_id = fake.random_element(user_ids)
     reviewed_id = fake.random_element(user_ids)

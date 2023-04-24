@@ -9,7 +9,7 @@
 	let highestBid = 100000;
 	let highestBidItemId = 0;
 
-	console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
+	//console.log('data in auctionDetailsBidStats.svelte: ', JSON.stringify(data.props.bids));
 	let bidCount = 0;
 	if (
 		data.props.bids &&
