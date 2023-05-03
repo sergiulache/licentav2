@@ -16,7 +16,7 @@
 	export let data;
 
 	// console log jsonified dat
-	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
+	console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
 
 	let showModal = false;
 	let showNotification = false;
@@ -32,7 +32,7 @@
 	let bid_completion_time = 30;
 
 	let sum = 0;
-	if (data.props.sellerReviews) {
+	if (data.props.sellerReviews && data.props.sellerReviews[0].review) {
 		data.props.sellerReviews.forEach((reviewData) => {
 			//console.log(reviewData.review.rating);
 			sum += reviewData.review.rating;

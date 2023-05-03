@@ -4,5 +4,3 @@
 	import { goto } from '$app/navigation';
 	import { isAuthenticated } from '$lib/auth';
 </script>
-
-Homepage
