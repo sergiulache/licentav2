@@ -1,13 +1,10 @@
 <script>
 	import { supabase } from '$lib/supabaseClient';
 	import { fade, slide } from 'svelte/transition';
-	import { userSession } from '../../stores/userSession';
-	import { documentUpload } from '../../stores/documentUpload';
+	import { userSession } from '../../../stores/userSession';
+	import { documentUpload } from '../../../stores/documentUpload';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { redirect } from '@sveltejs/kit';
-	import NotificationPhotoUploadSuccess from '../../components/notificationPhotoUploadSuccess.svelte';
+	import NotificationPhotoUploadSuccess from '../../../components/notificationPhotoUploadSuccess.svelte';
 
 	$: showNotification = false;
 	$: photoSupabaseURL = null;
@@ -19,26 +16,12 @@
 		if (browser) currentUser = value.user.id;
 	});
 
-	let documentUrl;
-
-	onMount(async () => {
-		await documentUpload.init();
-		documentUpload.subscribe((value) => {
-			//console.log('documentUploadStore changed:', value);
-			documentUrl = value;
-			checkAndRedirect();
-		});
+	let testDocumentStore = $documentUpload;
+	documentUpload.subscribe((value) => {
+		if (browser) testDocumentStore = value;
 	});
 
-	function checkAndRedirect() {
-		if (documentUrl === null) {
-			//console.log('User does not have a photo. Redirecting...');
-			// Perform the redirection here
-			//goto('/browse');
-		} else {
-			console.log('User has a photo.');
-		}
-	}
+	$: console.log('value in document store' + JSON.stringify(testDocumentStore));
 
 	async function uploadProfilePhoto(event) {
 		const file = event.target.files[0];

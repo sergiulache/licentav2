@@ -150,3 +150,10 @@ async def calculate_winner(data: dict):
     
 
     return {"winner": winner}
+
+@app.post("/confirm_identity")
+async def confirm_identity(data: dict):
+    photoURL = data["photoURL"]
+
+    print('confirm_identity')
+    return {"variable": photoURL}

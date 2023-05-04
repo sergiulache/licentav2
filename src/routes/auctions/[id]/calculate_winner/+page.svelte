@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
+	import { goto } from '$app/navigation';
 
 	export let data;
 	console.log(data);
@@ -46,6 +47,10 @@
 	onMount(() => {
 		calculateWinner();
 	});
+
+	function confirmIdentity() {
+		goto('/confirm_identity');
+	}
 </script>
 
 <div class="bg-white p-4 sm:ml-64">
@@ -54,5 +59,13 @@
 		<p class="text-gray-500">The winner of the auction:</p>
 		<p>{first_name + ' '} {last_name}</p>
 		<p>{email}</p>
+		{#if first_name}
+			<button
+				on:click={confirmIdentity}
+				type="button"
+				class="mt-6 w-full p-4 rounded-md border border-gray-300bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-green-50 hover:ring-green-500 hover:ring-offset-2  hover:ring-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm"
+				>Confirm Identity</button
+			>
+		{/if}
 	</div>
 </div>
