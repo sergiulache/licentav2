@@ -1,8 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 import numpy as np
 import pandas as pd
+import base64
+import io
+import cv2
+from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
@@ -151,9 +155,30 @@ async def calculate_winner(data: dict):
 
     return {"winner": winner}
 
+
+
+def base64_to_image(base64_data):
+    imgdata = base64.b64decode(str(base64_data))
+    img = Image.open(io.BytesIO(imgdata))
+    opencv_img= cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+    return opencv_img 
+
 @app.post("/confirm_identity")
 async def confirm_identity(data: dict):
-    photoURL = data["photoURL"]
+    # Extract the base64 encoded image data from the data
+    selfie_data = data["selfieDataUrl"]
+    document_data = data["photoURL"]
 
-    print('confirm_identity')
-    return {"variable": photoURL}
+    if ',' in selfie_data:
+        selfie_data = selfie_data.split(",")[1]
+
+    # Convert the base64 encoded strings to PIL Image objects
+
+    img_data = base64.b64decode(str(selfie_data))
+    with open("image.png", "wb") as image:
+        image.write(img_data)
+
+    variable = {}
+
+    return {"variable": variable}
+
