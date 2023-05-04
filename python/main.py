@@ -24,6 +24,7 @@ import io
 import numpy as np
 from skimage import io as sk_io
 import face_recognition
+import boto3
 
 
 
@@ -221,6 +222,24 @@ def resize_image(image, max_size):
     resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
     return resized_image
 
+
+def compare_faces_aws(sourceFile, targetFile):
+    client = boto3.client('rekognition')
+    imageSource = open(sourceFile, 'rb')
+    imageTarget = open(targetFile, 'rb')
+    response = client.compare_faces(SimilarityThreshold=90,
+                                    SourceImage={'Bytes': imageSource.read()},
+                                    TargetImage={'Bytes': imageTarget.read()})
+
+    for faceMatch in response['FaceMatches']:
+        similarity = faceMatch['Similarity']
+        print(f'Similarity: {similarity} %')
+    if not response['FaceMatches']:
+        print('Face doesn\'t match')
+        
+    imageSource.close()
+    imageTarget.close()
+
 @app.post("/confirm_identity")
 async def confirm_identity(data: dict):
     # Extract the base64 encoded image data from the data
@@ -304,7 +323,7 @@ async def confirm_identity(data: dict):
         print(f"Match Percentage: {match_percentage:.2f}%")
         variable = {"matchPercentage": match_percentage}
 
-    
+    compare_faces_aws("image.png", "document_image.jpg")
 
     return {"variable": variable}
 
