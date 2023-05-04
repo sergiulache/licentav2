@@ -1,11 +1,9 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from skimage import io
 
-import numpy as np
+
 import pandas as pd
-import base64
-import io
-import cv2
 from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GroupShuffleSplit
@@ -18,7 +16,15 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from helpers import generate_data, predict_winner_from_random_data
 import matplotlib.pyplot as plt
-import itertools
+import base64
+import requests
+from PIL import Image
+import cv2
+import io
+import numpy as np
+from skimage import io as sk_io
+import face_recognition
+
 
 
 
@@ -163,6 +169,58 @@ def base64_to_image(base64_data):
     opencv_img= cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
     return opencv_img 
 
+def save_image_from_url(url, file_name):
+    response = requests.get(url)
+    with open(file_name, "wb") as image:
+        image.write(response.content)
+
+
+def compare_faces(face1, face2):
+    face1_encodings = face_recognition.face_encodings(face1)
+    face2_encodings = face_recognition.face_encodings(face2)
+
+    rotations = [0, 90, 180, 270]
+
+    if len(face1_encodings) == 0:
+        for angle in rotations:
+            face1_rotated = np.rot90(face1, k=angle // 90)
+            face1_encodings = face_recognition.face_encodings(face1_rotated)
+            if len(face1_encodings) > 0:
+                break
+
+    if len(face2_encodings) == 0:
+        for angle in rotations:
+            face2_rotated = np.rot90(face2, k=angle // 90)
+            face2_encodings = face_recognition.face_encodings(face2_rotated)
+            if len(face2_encodings) > 0:
+                break
+
+    if len(face1_encodings) == 0 or len(face2_encodings) == 0:
+        return 0
+
+    face1_encoding = face1_encodings[0]
+    face2_encoding = face2_encodings[0]
+
+    match_result = face_recognition.compare_faces([face1_encoding], face2_encoding, tolerance=0.5)
+    face_distances = face_recognition.face_distance([face1_encoding], face2_encoding)
+    confidence = (1 - face_distances[0]) * 100
+
+    return confidence if match_result[0] else 0
+
+def resize_image(image, max_size):
+    height, width = image.shape[:2]
+    aspect_ratio = float(height) / float(width)
+    
+    if height > width:
+        new_height = max_size
+        new_width = int(new_height / aspect_ratio)
+    else:
+        new_width = max_size
+        new_height = int(new_width * aspect_ratio)
+
+    resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    return resized_image
+
 @app.post("/confirm_identity")
 async def confirm_identity(data: dict):
     # Extract the base64 encoded image data from the data
@@ -178,7 +236,75 @@ async def confirm_identity(data: dict):
     with open("image.png", "wb") as image:
         image.write(img_data)
 
-    variable = {}
+    # Save the document image from the URL
+    document_image_file_name = "document_image.jpg"
+    save_image_from_url(document_data, document_image_file_name)
+
+    # Display the selfie and document images using matplotlib
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+
+    axs[0].imshow(sk_io.imread("image.png"))
+    axs[0].set_title("Selfie Image")
+    axs[0].axis("off")
+
+    axs[1].imshow(sk_io.imread(document_image_file_name))
+    axs[1].set_title("Document Image")
+    axs[1].axis("off")
+
+    plt.show()
+
+
+
+    selfie_image = cv2.imread("image.png")
+    document_image = cv2.imread("document_image.jpg")
+
+    # Resize the images to 600x600
+    selfie_image = resize_image(selfie_image, 600)
+    document_image = resize_image(document_image, 600)
+    selfie_image = cv2.flip(selfie_image, 1)
+
+
+    cv2.imshow('Selfie Image', selfie_image)
+    cv2.imshow('Document Image', document_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+
+    # First way of comparing faces
+    # match_percentage = compare_faces(selfie_image, document_image)
+
+
+
+    # get the face encodings for each face
+    selfie_face_encodings = face_recognition.face_encodings(selfie_image)
+    document_face_encodings = face_recognition.face_encodings(document_image)
+
+    # check if either image couldn't be processed
+    if len(selfie_face_encodings) == 0 or len(document_face_encodings) == 0:
+        print("No faces found in one or both images.")
+        variable = {"matchPercentage": 0}
+    else:
+        # there might be multiple faces in an image, so take the first one
+        selfie_face_encoding = selfie_face_encodings[0]
+        document_face_encoding = document_face_encodings[0]
+
+        # compare faces and get euclidean distance
+        face_distances = face_recognition.face_distance([selfie_face_encoding], document_face_encoding)
+
+        # define your threshold (tweak this based on your requirements)
+        match_threshold = 1
+
+        # calculate match percentage
+        if face_distances[0] <= match_threshold:
+            match_percentage = (1 - face_distances[0]) / match_threshold * 100
+        else:
+            match_percentage = 0
+
+        print(f"Match Percentage: {match_percentage:.2f}%")
+        variable = {"matchPercentage": match_percentage}
+
+    
 
     return {"variable": variable}
 

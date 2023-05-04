@@ -16,7 +16,7 @@
 	let photo_data = null;
 
 	async function confirmIdentity() {
-		console.log('selfie data', capturedSelfie);
+		//console.log('selfie data', capturedSelfie);
 		const response = await fetch('http://127.0.0.1:8000/confirm_identity', {
 			method: 'POST',
 			headers: {
@@ -54,6 +54,7 @@
 		context.drawImage(video, 0, 0, 640, 480);
 		const dataUrl = canvas.toDataURL('image/jpeg');
 		capturedSelfie = dataUrl;
+		console.log('photoURL', photo_data);
 		confirmIdentity();
 	}
 
@@ -78,10 +79,12 @@
 	}
 
 	getUserProfilePhoto(currentUser).then((result) => {
-		if (result && result.photoURL) {
-			photo_data = result.photoURL;
-		} else {
-			console.log('User does not have a profile photo.');
+		if (browser) {
+			if (result && result.photoURL) {
+				photo_data = result.photoURL;
+			} else {
+				console.log('User does not have a profile photo.');
+			}
 		}
 	});
 </script>
