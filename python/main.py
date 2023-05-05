@@ -8,13 +8,14 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
+import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
-from helpers import generate_data, predict_winner_from_random_data
+from helpers import generate_data, predict_winner_from_random_data, base64_to_image, save_image_from_url, compare_faces, resize_image, compare_faces_aws
 import matplotlib.pyplot as plt
 import base64
 import requests
@@ -25,9 +26,7 @@ import numpy as np
 from skimage import io as sk_io
 import face_recognition
 import boto3
-
-
-
+import os
 
 # server start command: uvicorn main:app --reload
 geolocator = Nominatim(user_agent="myGeocoder")
@@ -45,7 +44,6 @@ app.add_middleware(
 import random
 
 np.random.seed(41)
-
 
 # Import data from training_data.csv
 data = pd.read_csv('training_data.csv')
@@ -75,13 +73,18 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Train the model
-model = RandomForestClassifier(random_state=42)
-model.fit(X_train_scaled, y_train)
+# Load model if it exists, train a new one otherwise
+if os.path.exists('model.pkl'):
+    print("Loading model...")
+    model = joblib.load('model.pkl')
+else:
+    print("Training model...")
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train_scaled, y_train)
+    joblib.dump(model, 'model.pkl') 
 
 # Make predictions on the test set
 y_pred = model.predict(X_test_scaled)
-
 
 # Get the feature importances
 feature_importances = model.feature_importances_
@@ -93,13 +96,9 @@ for name, importance in zip(feature_names, feature_importances):
 
 # Evaluate the model
 print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
-#print(classification_report(y_test, y_pred))
 
-
-predict_winner_from_random_data(100, 10, X_train, model)
+#predict_winner_from_random_data(100, 10, X_train, model)
  
-
-
 
 @app.post("/calculate_winner")
 async def calculate_winner(data: dict):
@@ -163,83 +162,6 @@ async def calculate_winner(data: dict):
     return {"winner": winner}
 
 
-
-def base64_to_image(base64_data):
-    imgdata = base64.b64decode(str(base64_data))
-    img = Image.open(io.BytesIO(imgdata))
-    opencv_img= cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-    return opencv_img 
-
-def save_image_from_url(url, file_name):
-    response = requests.get(url)
-    with open(file_name, "wb") as image:
-        image.write(response.content)
-
-
-def compare_faces(face1, face2):
-    face1_encodings = face_recognition.face_encodings(face1)
-    face2_encodings = face_recognition.face_encodings(face2)
-
-    rotations = [0, 90, 180, 270]
-
-    if len(face1_encodings) == 0:
-        for angle in rotations:
-            face1_rotated = np.rot90(face1, k=angle // 90)
-            face1_encodings = face_recognition.face_encodings(face1_rotated)
-            if len(face1_encodings) > 0:
-                break
-
-    if len(face2_encodings) == 0:
-        for angle in rotations:
-            face2_rotated = np.rot90(face2, k=angle // 90)
-            face2_encodings = face_recognition.face_encodings(face2_rotated)
-            if len(face2_encodings) > 0:
-                break
-
-    if len(face1_encodings) == 0 or len(face2_encodings) == 0:
-        return 0
-
-    face1_encoding = face1_encodings[0]
-    face2_encoding = face2_encodings[0]
-
-    match_result = face_recognition.compare_faces([face1_encoding], face2_encoding, tolerance=0.5)
-    face_distances = face_recognition.face_distance([face1_encoding], face2_encoding)
-    confidence = (1 - face_distances[0]) * 100
-
-    return confidence if match_result[0] else 0
-
-def resize_image(image, max_size):
-    height, width = image.shape[:2]
-    aspect_ratio = float(height) / float(width)
-    
-    if height > width:
-        new_height = max_size
-        new_width = int(new_height / aspect_ratio)
-    else:
-        new_width = max_size
-        new_height = int(new_width * aspect_ratio)
-
-    resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
-    return resized_image
-
-
-def compare_faces_aws(sourceFile, targetFile):
-    client = boto3.client('rekognition')
-    imageSource = open(sourceFile, 'rb')
-    imageTarget = open(targetFile, 'rb')
-    response = client.compare_faces(SimilarityThreshold=90,
-                                    SourceImage={'Bytes': imageSource.read()},
-                                    TargetImage={'Bytes': imageTarget.read()})
-
-    for faceMatch in response['FaceMatches']:
-        similarity = faceMatch['Similarity']
-        print(f'Similarity: {similarity} %')
-    if not response['FaceMatches']:
-        print('Face doesn\'t match')
-        
-    imageSource.close()
-    imageTarget.close()
-
 @app.post("/confirm_identity")
 async def confirm_identity(data: dict):
     # Extract the base64 encoded image data from the data
@@ -260,6 +182,7 @@ async def confirm_identity(data: dict):
     save_image_from_url(document_data, document_image_file_name)
 
     # Display the selfie and document images using matplotlib
+    """
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
     axs[0].imshow(sk_io.imread("image.png"))
@@ -271,7 +194,7 @@ async def confirm_identity(data: dict):
     axs[1].axis("off")
 
     plt.show()
-
+    """
 
 
     selfie_image = cv2.imread("image.png")
@@ -287,8 +210,6 @@ async def confirm_identity(data: dict):
     cv2.imshow('Document Image', document_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-
 
     # First way of comparing faces
     # match_percentage = compare_faces(selfie_image, document_image)
@@ -323,7 +244,7 @@ async def confirm_identity(data: dict):
         print(f"Match Percentage: {match_percentage:.2f}%")
         variable = {"matchPercentage": match_percentage}
 
-    compare_faces_aws("image.png", "document_image.jpg")
+    similarity = compare_faces_aws("image.png", "document_image.jpg")
 
-    return {"variable": variable}
+    return {"similarity": similarity}
 

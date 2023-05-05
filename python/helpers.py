@@ -13,6 +13,32 @@ from sklearn.preprocessing import MinMaxScaler
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import random
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from skimage import io
+import pandas as pd
+from PIL import Image
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GroupShuffleSplit
+from sklearn.preprocessing import StandardScaler
+import joblib
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
+import matplotlib.pyplot as plt
+import base64
+import requests
+from PIL import Image
+import cv2
+import io
+import numpy as np
+from skimage import io as sk_io
+import face_recognition
+import boto3
+import os
 
 np.random.seed(41)
 
@@ -126,3 +152,83 @@ def predict_winner_from_random_data(n_groups, candidates_per_group, X_train, mod
     winners = winners[['group_id', 'candidate_id', 'score']]
     print("\n\nPrinting winners:\n\n")
     print(winners)
+
+
+def base64_to_image(base64_data):
+    imgdata = base64.b64decode(str(base64_data))
+    img = Image.open(io.BytesIO(imgdata))
+    opencv_img= cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+    return opencv_img 
+
+def save_image_from_url(url, file_name):
+    response = requests.get(url)
+    with open(file_name, "wb") as image:
+        image.write(response.content)
+
+def resize_image(image, max_size):
+    height, width = image.shape[:2]
+    aspect_ratio = float(height) / float(width)
+    
+    if height > width:
+        new_height = max_size
+        new_width = int(new_height / aspect_ratio)
+    else:
+        new_width = max_size
+        new_height = int(new_width * aspect_ratio)
+
+    resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    return resized_image
+
+
+def compare_faces(face1, face2):
+    face1_encodings = face_recognition.face_encodings(face1)
+    face2_encodings = face_recognition.face_encodings(face2)
+
+    rotations = [0, 90, 180, 270]
+
+    if len(face1_encodings) == 0:
+        for angle in rotations:
+            face1_rotated = np.rot90(face1, k=angle // 90)
+            face1_encodings = face_recognition.face_encodings(face1_rotated)
+            if len(face1_encodings) > 0:
+                break
+
+    if len(face2_encodings) == 0:
+        for angle in rotations:
+            face2_rotated = np.rot90(face2, k=angle // 90)
+            face2_encodings = face_recognition.face_encodings(face2_rotated)
+            if len(face2_encodings) > 0:
+                break
+
+    if len(face1_encodings) == 0 or len(face2_encodings) == 0:
+        return 0
+
+    face1_encoding = face1_encodings[0]
+    face2_encoding = face2_encodings[0]
+
+    match_result = face_recognition.compare_faces([face1_encoding], face2_encoding, tolerance=0.5)
+    face_distances = face_recognition.face_distance([face1_encoding], face2_encoding)
+    confidence = (1 - face_distances[0]) * 100
+
+    return confidence if match_result[0] else 0
+
+
+def compare_faces_aws(sourceFile, targetFile):
+    client = boto3.client('rekognition')
+    imageSource = open(sourceFile, 'rb')
+    imageTarget = open(targetFile, 'rb')
+    response = client.compare_faces(SimilarityThreshold=90,
+                                    SourceImage={'Bytes': imageSource.read()},
+                                    TargetImage={'Bytes': imageTarget.read()})
+
+    for faceMatch in response['FaceMatches']:
+        similarity = faceMatch['Similarity']
+        print(f'Similarity: {similarity} %')
+        return similarity
+    if not response['FaceMatches']:
+        print('Face doesn\'t match')
+        return 0
+        
+    imageSource.close()
+    imageTarget.close()
+

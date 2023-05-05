@@ -37,6 +37,10 @@
 			showModal = true;
 		}
 	}
+
+	function uploadDocument() {
+		goto('/profile/upload_document');
+	}
 </script>
 
 <ModalSuccessProfile show={showModal} />
@@ -231,23 +235,33 @@
 						/>
 					</div>
 				</div>
+				<div
+					class="sm:grid sm:grid-cols-5 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-0"
+				>
+					<button
+						on:click={uploadDocument}
+						type="button"
+						class="mt-6 w-full p-4 rounded-md border border-gray-300bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-green-50 hover:ring-green-500 hover:ring-offset-2  hover:ring-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm"
+						>Upload verification document</button
+					>
+				</div>
 			</div>
 		</div>
-	</div>
-	<div class="pt-5">
-		<div class="flex justify-end">
-			<button
-				on:click={handleCancel}
-				type="button"
-				class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-				>Cancel</button
-			>
-			<button
-				on:click={handleSave}
-				type="submit"
-				class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-				>Save</button
-			>
+		<div class="pt-5">
+			<div class="flex justify-end">
+				<button
+					on:click={handleCancel}
+					type="button"
+					class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					>Cancel</button
+				>
+				<button
+					on:click={handleSave}
+					type="submit"
+					class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					>Save</button
+				>
+			</div>
 		</div>
 	</div>
 </form>
