@@ -150,8 +150,8 @@
 								By proceeding with the selfie capture, you consent to the use of your photo for the
 								sole purpose of verifying your identity against the previously uploaded document.
 								Your photo will be processed with utmost respect for your privacy, and it will not
-								be used for any other purposes or shared with third parties. Please confirm your
-								agreement before continuing.
+								be used for any other purposes or shared with third parties. By continuing, you
+								agree to these terms.
 							</p>
 							<p class="text-base leading-7 text-green-800">
 								Your photo will be deleted from our servers after the verification process.
