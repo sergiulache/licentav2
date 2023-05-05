@@ -20,6 +20,9 @@
 		return winnerInformation;
 	}
 	async function calculateWinner() {
+		// Show the spinner
+		document.getElementById('spinner').style.display = 'block';
+
 		const response = await fetch('http://127.0.0.1:8000/calculate_winner', {
 			method: 'POST',
 			headers: {
@@ -31,9 +34,7 @@
 
 		if (response.ok) {
 			const result = await response.json();
-			//const winner = result.winner;
 			console.log('winner', result.winner.bidder_id);
-			// select name, last name and email from users where user_id = winner
 			winnerInformation = await getWinnerData(result.winner.bidder_id);
 			console.log('winnerInformation', winnerInformation);
 			first_name = winnerInformation[0].first_name;
@@ -42,6 +43,9 @@
 		} else {
 			console.error('Error calculating winner:', response.status, response.statusText);
 		}
+
+		// Hide the spinner
+		document.getElementById('spinner').style.display = 'none';
 	}
 
 	onMount(() => {
@@ -59,6 +63,10 @@
 		<p class="text-gray-500">The winner of the auction:</p>
 		<p>{first_name + ' '} {last_name}</p>
 		<p>{email}</p>
+		<div class="pt-8">
+			<div id="spinner" class="loader" style="display: none;" />
+		</div>
+
 		{#if first_name}
 			<button
 				on:click={confirmIdentity}
@@ -69,3 +77,23 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	.loader {
+		border: 8px solid #f3f3f3;
+		border-top: 8px solid #3498db;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		animation: spin 2s linear infinite;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+</style>
