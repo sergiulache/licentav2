@@ -13,8 +13,12 @@
 	$: last_name = '';
 	$: email = '';
 
-	const userSessionData = get(userSession);
-	const jwt = userSessionData.access_token;
+	$: jwt = null;
+
+	if (browser) {
+		const userSessionData = get(userSession);
+		jwt = userSessionData.access_token;
+	}
 
 	// add JWT to existing data
 	const dataWithJWT = { ...data, jwt: jwt };

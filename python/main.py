@@ -2,26 +2,17 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from skimage import io
 
-
 import pandas as pd
-from PIL import Image
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
 import joblib
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import MinMaxScaler
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
-from helpers import generate_data, predict_winner_from_random_data, base64_to_image, save_image_from_url, compare_faces, resize_image, compare_faces_aws
+from helpers import generate_data, predict_winner_from_random_data, base64_to_image, save_image_from_url, compare_faces, resize_image, compare_faces_aws, verify_jwt
 import matplotlib.pyplot as plt
 import base64
-import requests
-from PIL import Image
 import cv2
-import io
 import numpy as np
 from skimage import io as sk_io
 import face_recognition
@@ -104,6 +95,16 @@ print("Accuracy: {:.2f}".format(model.score(X_test_scaled, y_test)))
 async def calculate_winner(data: dict):
     winner = {}
     bids = data["data"]
+    jwt_token = data["jwt"]
+    #print(jwt_token)
+
+    decoded_jwt = verify_jwt(jwt_token)
+    if decoded_jwt is None:
+        print("Invalid JWT, exiting...")
+    else:
+        print("JWT is valid, continuing...")
+
+    
 
     for bid in bids:
         bidder_location = geolocator.geocode(f"{bid['city']}")
@@ -167,6 +168,7 @@ async def confirm_identity(data: dict):
     # Extract the base64 encoded image data from the data
     selfie_data = data["selfieDataUrl"]
     document_data = data["photoURL"]
+    
 
     if ',' in selfie_data:
         selfie_data = selfie_data.split(",")[1]
@@ -213,7 +215,6 @@ async def confirm_identity(data: dict):
 
     # First way of comparing faces
     # match_percentage = compare_faces(selfie_image, document_image)
-
 
 
     # get the face encodings for each face

@@ -1,44 +1,19 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
-from geopy.geocoders import Nominatim
-from geopy.distance import geodesic
-import random
-from fastapi import FastAPI, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
 from skimage import io
-import pandas as pd
 from PIL import Image
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GroupShuffleSplit
 from sklearn.preprocessing import StandardScaler
-import joblib
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
-from geopy.geocoders import Nominatim
-from geopy.distance import geodesic
-import matplotlib.pyplot as plt
 import base64
 import requests
-from PIL import Image
 import cv2
 import io
-import numpy as np
 from skimage import io as sk_io
 import face_recognition
 import boto3
-import os
+import jwt
 
 np.random.seed(41)
 
@@ -231,4 +206,24 @@ def compare_faces_aws(sourceFile, targetFile):
         
     imageSource.close()
     imageTarget.close()
+
+
+import jwt
+
+def verify_jwt(jwt_token):
+    # Replace the following string with your Supabase JWT secret
+    supabase_jwt_secret = "KEImASZsg3WOGUG0vm6qcCbH+lDKNPPE5sGN2OQm3r3WKuWIQmf7Ns/2+XlqvjSWEVrqf0PQStkFWtkSCcBYuQ=="
+
+    try:
+        decoded = jwt.decode(
+            jwt_token,
+            supabase_jwt_secret,
+            algorithms=["HS256"],
+            audience="authenticated"  # Update the audience value here
+        )
+        return decoded
+    except Exception as e:
+        print(f"Error decoding JWT: {e}")
+        return None
+
 
