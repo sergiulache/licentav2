@@ -7,7 +7,7 @@ export async function load({ params }) {
 
 	const { data, error } = await supabase.rpc('get_auction_data', { p_item_id: params.id });
 
-	console.log('error', error);
+	//console.log('error', error);
 
 	const itemData = data[0].item_data;
 	const bids = data.map((row) => row.bid_data).filter((bid) => bid !== null);

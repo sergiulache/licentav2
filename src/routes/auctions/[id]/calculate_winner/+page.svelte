@@ -2,21 +2,30 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient';
 	import { goto } from '$app/navigation';
+	import { userSession } from '../../../../stores/userSession.js';
+	import { browser } from '$app/environment';
+	import { get } from 'svelte/store';
 
 	export let data;
-	console.log(data);
+	//console.log(data);
 	$: winnerInformation = {};
 	$: first_name = '';
 	$: last_name = '';
 	$: email = '';
+
+	const userSessionData = get(userSession);
+	const jwt = userSessionData.access_token;
+
+	// add JWT to existing data
+	const dataWithJWT = { ...data, jwt: jwt };
 
 	async function getWinnerData(id) {
 		const { data: winnerInformation, error: error } = await supabase
 			.from('users')
 			.select('first_name, last_name, email')
 			.eq('user_id', id);
-		console.log('data', data);
-		console.log('error', error);
+		//console.log('data', data);
+		//console.log('error', error);
 		return winnerInformation;
 	}
 	async function calculateWinner() {
@@ -29,12 +38,12 @@
 				'Content-Type': 'application/json'
 			},
 			// body is data to json
-			body: JSON.stringify(data)
+			body: JSON.stringify(dataWithJWT)
 		});
 
 		if (response.ok) {
 			const result = await response.json();
-			console.log('winner', result.winner.bidder_id);
+			//console.log('winner', result.winner.bidder_id);
 			winnerInformation = await getWinnerData(result.winner.bidder_id);
 			console.log('winnerInformation', winnerInformation);
 			first_name = winnerInformation[0].first_name;

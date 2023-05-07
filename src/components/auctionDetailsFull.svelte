@@ -16,7 +16,7 @@
 	export let data;
 
 	// console log jsonified dat
-	console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
+	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
 
 	let showModal = false;
 	let showNotification = false;
@@ -92,7 +92,7 @@
 
 	function handleCalculateWinner() {
 		// goto the calculate winner page for this item
-		console.log('handleCalculateWinner');
+		//console.log('handleCalculateWinner');
 		goto(`${data.props.data.item.item_id}/calculate_winner/`);
 	}
 </script>
