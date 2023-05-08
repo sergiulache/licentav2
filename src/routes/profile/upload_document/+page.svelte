@@ -6,6 +6,7 @@
 	import { browser } from '$app/environment';
 	import NotificationPhotoUploadSuccess from '../../../components/notificationPhotoUploadSuccess.svelte';
 
+	let workPermit = 'static/workPermit.png';
 	$: showNotification = false;
 	$: photoSupabaseURL = null;
 	$: viewPhoto = false;
@@ -116,7 +117,7 @@
 						</div>
 						<p class="mt-3 text-gray-500 text-sm truncate">Standard Issue ID Card</p>
 					</div>
-					<img class="h-20" src="https://i.imgur.com/benAQzi.png" alt="" />
+					<img class="h-20" src="/IDCard.png" alt="" />
 				</div>
 			</li>
 			<li class="col-span-1 bg-white rounded-lg shadow-lg border divide-y divide-gray-200">
@@ -131,7 +132,7 @@
 						</div>
 						<p class="mt-3 text-gray-500 text-sm truncate">International Driving Permits</p>
 					</div>
-					<img class="h-20" src="https://i.imgur.com/xQsVwkG.png" alt="" />
+					<img class="h-20" src="/driverLicense.png" alt="" />
 				</div>
 			</li>
 			<li class="col-span-1 bg-white rounded-lg shadow-lg border divide-y divide-gray-200">
@@ -165,7 +166,7 @@
 						</div>
 						<p class="mt-2 text-gray-500 text-sm truncate">Not using the original document</p>
 					</div>
-					<img class="h-24" src="https://i.imgur.com/UKPojik.png" alt="" />
+					<img class="h-24" src="/documentCopies.png" alt="" />
 				</div>
 			</li>
 			<li class="col-span-1 bg-white rounded-lg shadow-lg border divide-y divide-gray-200">
@@ -180,7 +181,7 @@
 						</div>
 						<p class="mt-2 text-gray-500 text-sm truncate">Any University Issued Cards</p>
 					</div>
-					<img class="h-24" src="https://i.imgur.com/8zwckGP.png" alt="" />
+					<img class="h-24" src="/studentCard.png" alt="" />
 				</div>
 			</li>
 			<li class="col-span-1 bg-white rounded-lg shadow-lg border divide-y divide-gray-200">
@@ -195,7 +196,7 @@
 						</div>
 						<p class="mt-2 text-gray-500 text-sm truncate">Any type of granted work permit</p>
 					</div>
-					<img class="h-24" src="https://i.imgur.com/FfEdDn6.png" alt="" />
+					<img class="h-24" src="/workPermit.png" alt="" />
 				</div>
 			</li>
 		</ul>

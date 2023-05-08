@@ -15,7 +15,7 @@ import base64
 import cv2
 import numpy as np
 from skimage import io as sk_io
-import face_recognition
+#import face_recognition
 import boto3
 import os
 
@@ -184,7 +184,7 @@ async def confirm_identity(data: dict):
     save_image_from_url(document_data, document_image_file_name)
 
     # Display the selfie and document images using matplotlib
-    """
+    
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
 
     axs[0].imshow(sk_io.imread("image.png"))
@@ -196,7 +196,7 @@ async def confirm_identity(data: dict):
     axs[1].axis("off")
 
     plt.show()
-    """
+    
 
 
     selfie_image = cv2.imread("image.png")
@@ -207,17 +207,20 @@ async def confirm_identity(data: dict):
     document_image = resize_image(document_image, 600)
     selfie_image = cv2.flip(selfie_image, 1)
 
-
+    """
+    # Show the images with OpenCV (does not work on linux)
     cv2.imshow('Selfie Image', selfie_image)
     cv2.imshow('Document Image', document_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    """
 
     # First way of comparing faces
     # match_percentage = compare_faces(selfie_image, document_image)
 
 
     # get the face encodings for each face
+    """
     selfie_face_encodings = face_recognition.face_encodings(selfie_image)
     document_face_encodings = face_recognition.face_encodings(document_image)
 
@@ -244,7 +247,7 @@ async def confirm_identity(data: dict):
 
         print(f"Match Percentage: {match_percentage:.2f}%")
         variable = {"matchPercentage": match_percentage}
-
+    """
     similarity = compare_faces_aws("image.png", "document_image.jpg")
 
     return {"similarity": similarity}

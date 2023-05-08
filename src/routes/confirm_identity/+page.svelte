@@ -105,9 +105,7 @@
 					<div
 						aria-hidden="true"
 						class="hidden sm:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-screen"
-					>
-						<div class="absolute inset-y-0 right-1/2 w-full bg-gray-50 rounded-r-3xl lg:right-72" />
-					</div>
+					/>
 					<div
 						class="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0 lg:max-w-none lg:py-20 "
 					>

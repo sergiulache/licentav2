@@ -11,9 +11,9 @@ import requests
 import cv2
 import io
 from skimage import io as sk_io
-import face_recognition
+#import face_recognition
 import boto3
-import jwt
+import jwt as pyjwt
 
 np.random.seed(41)
 
@@ -215,7 +215,7 @@ def verify_jwt(jwt_token):
     supabase_jwt_secret = "KEImASZsg3WOGUG0vm6qcCbH+lDKNPPE5sGN2OQm3r3WKuWIQmf7Ns/2+XlqvjSWEVrqf0PQStkFWtkSCcBYuQ=="
 
     try:
-        decoded = jwt.decode(
+        decoded = pyjwt.decode(
             jwt_token,
             supabase_jwt_secret,
             algorithms=["HS256"],
