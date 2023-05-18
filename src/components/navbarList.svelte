@@ -1,5 +1,9 @@
 <script>
-	import NavbarProfile from './navbarProfile.svelte';
+	import { current } from '../stores/currentNav';
+
+	function handleClick(path) {
+		$current = path;
+	}
 </script>
 
 <aside
