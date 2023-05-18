@@ -3,27 +3,30 @@
 	import { supabase } from '$lib/supabaseClient';
 	import ModalSuccessProfile from '../../components/modalSuccessProfile.svelte';
 	export let data;
-	//console.log('data in profile page: ', data.profileData);
 
-	// if no data, field is null
-	let username = data.profileData.username ? data.profileData.username : '';
-	let about = data.profileData.about ? data.profileData.about : '';
-	let first_name = data.profileData.first_name ? data.profileData.first_name : '';
-	let last_name = data.profileData.last_name ? data.profileData.last_name : '';
-	let country = data.profileData.country ? data.profileData.country : '';
-	let address = data.profileData.address ? data.profileData.address : '';
-	let city = data.profileData.city ? data.profileData.city : '';
-	let state = data.profileData.state ? data.profileData.state : '';
-	let zip = data.profileData.zip ? data.profileData.zip : '';
-
+	// Initialize the variables
+	let username, about, first_name, last_name, country, address, city, state, zip;
 	let showModal = false;
+
+	$: if (data && data.props && data.props.profileData) {
+		// When data is available, set the variables
+		username = data.props.profileData.username ? data.props.profileData.username : '';
+		about = data.props.profileData.about ? data.props.profileData.about : '';
+		first_name = data.props.profileData.first_name ? data.props.profileData.first_name : '';
+		last_name = data.props.profileData.last_name ? data.props.profileData.last_name : '';
+		country = data.props.profileData.country ? data.props.profileData.country : '';
+		address = data.props.profileData.address ? data.props.profileData.address : '';
+		city = data.props.profileData.city ? data.props.profileData.city : '';
+		state = data.props.profileData.state ? data.props.profileData.state : '';
+		zip = data.props.profileData.zip ? data.props.profileData.zip : '';
+	}
 
 	function handleCancel() {
 		goto('/auctions');
 	}
 
 	async function handleSave() {
-		let userID = data.profileData.user_id;
+		let userID = data.props.profileData.user_id;
 		// update supabase user table with new data, for this user ID
 		const { dataUpdate, error } = await supabase
 			.from('users')

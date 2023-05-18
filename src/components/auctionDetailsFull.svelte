@@ -7,19 +7,14 @@
 	import { userSession } from '../stores/userSession';
 	import { supabase } from '$lib/supabaseClient';
 	import { browser } from '$app/environment';
-	import ModalSuccessAuction from './modalSuccessAuction.svelte';
-	import ModalNewBid from './modalNewBid.svelte';
-	import { bidsStore } from '../stores/bidsStore';
-	import NotificationBidCreateSuccess from './notificationBidCreateSuccess.svelte';
 	import { goto } from '$app/navigation';
+	import toast, { Toaster } from 'svelte-french-toast';
 
 	export let data;
 
 	// console log jsonified dat
 	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
 
-	let showModal = false;
-	let showNotification = false;
 	let validExpirationDate = false;
 
 	if (new Date(data.props.data.item.expiration_date) > new Date()) {
@@ -61,29 +56,34 @@
 		let itemID = data.props.data.item.item_id;
 
 		// add a new bid in supabase with the item id, bidder_id and bid amount
-		const { dataNewBid, error } = await supabase
-			.from('bids')
-			.insert([
-				{
-					item_id: itemID,
-					bidder_id: currentUser,
-					bid_amount: bid_amount,
-					bid_completion_date: bid_completion_date,
-					bid_completion_time: bid_completion_time
-				}
-			])
-			.single();
+		const createBid = async () => {
+			const { dataNewBid, error } = await supabase
+				.from('bids')
+				.insert([
+					{
+						item_id: itemID,
+						bidder_id: currentUser,
+						bid_amount: bid_amount,
+						bid_completion_date: bid_completion_date,
+						bid_completion_time: bid_completion_time
+					}
+				])
+				.single();
 
-		if (!error) {
-			//console.log('bid added');
-			showNotification = true;
-			// wait 5 seconds and then hide the modal
-			setTimeout(() => {
-				showNotification = false;
-			}, 5000);
-		} else {
-			console.log('error adding bid');
-		}
+			if (error) {
+				console.log('error adding bid');
+				return false;
+			} else {
+				//console.log('bid added');
+				return true;
+			}
+		};
+
+		toast.promise(createBid(), {
+			loading: 'Creating bid...',
+			success: 'Bid created successfully!',
+			error: 'Error creating bid.'
+		});
 	}
 
 	function handleContact() {
@@ -97,11 +97,7 @@
 	}
 </script>
 
-{#if showNotification}
-	<div transition:fade={{ duration: 1000 }}>
-		<NotificationBidCreateSuccess />
-	</div>
-{/if}
+<Toaster />
 
 <div class="bg-white p-4 sm:ml-64">
 	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8">
