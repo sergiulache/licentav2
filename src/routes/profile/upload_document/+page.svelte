@@ -4,10 +4,8 @@
 	import { userSession } from '../../../stores/userSession';
 	import { documentUpload } from '../../../stores/documentUpload';
 	import { browser } from '$app/environment';
-	import NotificationPhotoUploadSuccess from '../../../components/notificationPhotoUploadSuccess.svelte';
+	import toast, { Toaster } from 'svelte-french-toast';
 
-	let workPermit = 'static/workPermit.png';
-	$: showNotification = false;
 	$: photoSupabaseURL = null;
 	$: viewPhoto = false;
 	$: photoVersion = 0;
@@ -47,10 +45,6 @@
 		} else {
 			console.log('Profile photo uploaded successfully');
 			photoVersion += 1;
-			showNotification = true;
-			setTimeout(() => {
-				showNotification = false;
-			}, 5000);
 			// You can save the file URL to the user's profile in your database if needed
 			// const fileUrl = supabase.storage.from('<your_bucket_name>').getPublicUrl(filePath);
 		}
@@ -88,13 +82,17 @@
 	function handleViewPhoto() {
 		viewPhoto = !viewPhoto;
 	}
+
+	function handleFileChange(event) {
+		toast.promise(uploadProfilePhoto(event), {
+			loading: 'Uploading...',
+			success: 'Profile photo uploaded successfully!',
+			error: 'Error uploading profile photo.'
+		});
+	}
 </script>
 
-{#if showNotification}
-	<div transition:fade={{ duration: 1000 }}>
-		<NotificationPhotoUploadSuccess />
-	</div>
-{/if}
+<Toaster />
 
 <div class="space-y-6 p-4 sm:ml-64">
 	<div class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
@@ -250,7 +248,7 @@
 								name="file-upload"
 								type="file"
 								class="sr-only"
-								on:change={uploadProfilePhoto}
+								on:change={handleFileChange}
 							/>
 						</label>
 						<p class="pl-1">or drag and drop</p>
