@@ -8,6 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { redirect } from '@sveltejs/kit';
 	import NotificationPhotoUploadSuccess from '../../components/notificationPhotoUploadSuccess.svelte';
+	import { Card } from 'attractions';
 
 	$: showNotification = false;
 	$: photoSupabaseURL = null;
@@ -104,6 +105,17 @@
 	function handleViewPhoto() {
 		viewPhoto = !viewPhoto;
 	}
+
+	async function* getOptions(text) {
+		await sleep(1000);
+		yield [{ name: text, details: 'Optional' }, { name: `it highlights the match: ${text}` }];
+	}
+
+	const items = [
+		{ href: '/', text: 'Home' },
+		{ href: '/docs', text: 'Docs' },
+		{ text: 'Components' }
+	];
 </script>
 
 {#if showNotification}
@@ -120,6 +132,8 @@
 			Please upload any of the valid documents below. This photo will be used for confirming your
 			identity when bidding on auctions.
 		</p>
+		<Card>card content</Card>
+		<Card outline>card content</Card>
 		<ul class="grid grid-cols-1 my-5 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			<li class="col-span-1 bg-white rounded-lg shadow-lg border divide-y divide-gray-200">
 				<div class="w-full flex items-center justify-between p-6 space-x-6">
