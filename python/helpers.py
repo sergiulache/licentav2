@@ -192,9 +192,18 @@ def compare_faces_aws(sourceFile, targetFile):
     client = boto3.client('rekognition')
     imageSource = open(sourceFile, 'rb')
     imageTarget = open(targetFile, 'rb')
-    response = client.compare_faces(SimilarityThreshold=90,
-                                    SourceImage={'Bytes': imageSource.read()},
-                                    TargetImage={'Bytes': imageTarget.read()})
+
+    if not imageSource or not imageTarget:
+        print('Error opening source or target image file')
+        return 0
+
+    try:
+        response = client.compare_faces(SimilarityThreshold=80,
+                                        SourceImage={'Bytes': imageSource.read()},
+                                        TargetImage={'Bytes': imageTarget.read()})
+    except Exception as e:
+        print(e)
+        return 0
 
     for faceMatch in response['FaceMatches']:
         similarity = faceMatch['Similarity']

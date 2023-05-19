@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import AlertFaceVerificationSuccess from '../../components/alertFaceVerificationSuccess.svelte';
+	import toast, { Toaster } from 'svelte-french-toast';
 
 	let video;
 	let showAlert = false;
@@ -19,23 +20,36 @@
 
 	async function confirmIdentity() {
 		//console.log('selfie data', capturedSelfie);
-		const response = await fetch('http://127.0.0.1:8000/confirm_identity', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			// body is data to json
-			body: JSON.stringify({ photoURL: photo_data, selfieDataUrl: capturedSelfie })
-		});
 
-		if (response.ok) {
-			const result = await response.json();
-			//const winner = result.winner;
-			console.log('result received in svelte: ', JSON.stringify(result));
-			showAlert = true;
-		} else {
-			console.error('Error calculating winner:', response.status, response.statusText);
-		}
+		const verifyIdentity = async () => {
+			const response = await fetch('http://127.0.0.1:8000/confirm_identity', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				// body is data to json
+				body: JSON.stringify({ photoURL: photo_data, selfieDataUrl: capturedSelfie })
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				//const winner = result.winner;
+				console.log('result received in svelte: ', JSON.stringify(result));
+				if (result.similarity < 0.3) {
+					throw new Error('Error: similarity is too low.');
+				}
+				return true;
+			} else {
+				console.error('Error calculating winner:', response.status, response.statusText);
+				return false;
+			}
+		};
+
+		toast.promise(verifyIdentity(), {
+			loading: 'Verifying identity...',
+			success: 'Verification complete!',
+			error: (err) => err.message
+		});
 	}
 
 	onMount(async () => {
@@ -96,6 +110,7 @@
 	<AlertFaceVerificationSuccess />
 {/if}
 
+<Toaster />
 <div class="space-y-6 p-4 sm:ml-64">
 	<div class="bg-white box-shadow-xl px-4 py-5 sm:rounded-lg sm:p-6">
 		<canvas id="canvas" width="640" height="480" style="display:none;" />

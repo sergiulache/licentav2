@@ -70,21 +70,27 @@
 	}
 </script>
 
-<div class="bg-white p-4 sm:ml-64">
-	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8">
-		<h1 class="text-2xl font-bold">Winner</h1>
-		<p class="text-gray-500">The winner of the auction:</p>
-		<p>{first_name + ' '} {last_name}</p>
-		<p>{email}</p>
-		<div class="pt-8">
-			<div id="spinner" class="loader" style="display: none;" />
+<div class="bg-white p-4 sm:ml-64 transition-opacity animate-fadeIn">
+	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8 text-center">
+		<h1 class="text-4xl font-bold text-gray-800 mb-6">Winner Announcement</h1>
+		<p class="text-gray-500 text-lg mb-4">Congratulations to the winner of the auction:</p>
+		<div class="text-2xl font-semibold text-gray-700">
+			<div class="pt-8 flex justify-center items-center" style="height: 2em;">
+				<div
+					id="spinner"
+					class="loader animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"
+					style="display: none;"
+				/>
+			</div>
+			<p>{first_name + ' '} {last_name}</p>
+			<p>{email}</p>
 		</div>
 
 		{#if first_name}
 			<button
 				on:click={confirmIdentity}
 				type="button"
-				class="mt-6 w-full p-4 rounded-md border border-gray-300bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-green-50 hover:ring-green-500 hover:ring-offset-2  hover:ring-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm"
+				class="mt-10 w-full p-4 rounded-md border border-gray-300 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm transition-colors duration-200"
 				>Confirm Identity</button
 			>
 		{/if}
@@ -108,5 +114,20 @@
 		100% {
 			transform: rotate(360deg);
 		}
+	}
+
+	@keyframes fadeIn {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+	.animate-fadeIn {
+		animation: fadeIn 1s ease-in;
+	}
+	.loader {
+		border-left-color: transparent;
 	}
 </style>
