@@ -8,26 +8,6 @@
 	import ModalUploadDocumentError from '../../components/modalUploadDocumentError.svelte';
 
 	let showModal = false;
-
-	/*
-	let loggedIn = false;
-	onMount(async () => {
-		loggedIn = await isAuthenticated();
-		if (!loggedIn) {
-			console.log('Layout logged in: ' + loggedIn);
-		}
-	});
-	loggedIn = loggedIn;
-	*/
-	/*
-	let loggedIn = $userSession;
-	loggedIn = loggedIn;
-	console.log('test page logged in: ' + loggedIn);
-	userSession.subscribe((value) => {
-		loggedIn = value;
-	});
-	*/
-
 	let documentUrl;
 
 	onMount(async () => {
