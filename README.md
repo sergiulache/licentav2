@@ -17,8 +17,8 @@ This platform is designed to provide a friendly UI while keeping things in check
 To get started with this project, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/service-auction-platform.git
-cd service-auction-platform
+git clone https://github.com/sergiulache/licentav2.git
+cd licentav2
 ```
 
 ## Running the dev build
