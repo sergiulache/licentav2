@@ -15,7 +15,7 @@
 		return {
 			...notification,
 			title: `Notification for item ${notification.item_title}`, // modify this line to suit your title requirements
-			body: `You have won the auction ${notification.item_title}.` // modify this line to suit your body requirements
+			body: `You have won the auction ${notification.item_title} You need to confirm your identity before the process is complete.` // modify this line to suit your body requirements
 		};
 	});
 
@@ -35,6 +35,10 @@
 				n.notification_id === notification.notification_id ? notification : n
 			);
 		}
+	}
+
+	function verifyIdentity() {
+		goto('/confirm_identity');
 	}
 </script>
 
@@ -57,12 +61,20 @@
 										</h3>
 										<p class="mt-1 text-sm text-gray-600 line-clamp-2">{notification.body}</p>
 									</div>
-									<button
-										class="rounded-md border border-light-blue-300 text-light-blue-500 px-3 py-1 float-right"
-										on:click={() => dismissNotification(notification)}
-									>
-										Dismiss
-									</button>
+									<div>
+										<button
+											class="rounded-md border-2 bg-red-200/25 border-red-700/50 text-light-blue-500 px-3 py-1 float-right"
+											on:click={() => dismissNotification(notification)}
+										>
+											Dismiss
+										</button>
+										<button
+											class="rounded-md border-2 bg-blue-100 border-blue-300 text-light-blue-500 px-3 py-1 float-right mr-3"
+											on:click={() => verifyIdentity()}
+										>
+											Confirm Identity
+										</button>
+									</div>
 								</div>
 							</li>
 						{/each}
