@@ -8,7 +8,6 @@
 	import { goto } from '$app/navigation';
 	import { redirect } from '@sveltejs/kit';
 	import NotificationPhotoUploadSuccess from '../../components/notificationPhotoUploadSuccess.svelte';
-	import { Card } from 'attractions';
 
 	$: showNotification = false;
 	$: photoSupabaseURL = null;

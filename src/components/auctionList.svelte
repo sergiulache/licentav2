@@ -6,6 +6,15 @@
 
 	let auctionNames = [];
 	let searchQuery = '';
+
+	$: {
+		if (searchQuery.length >= 3) {
+			search();
+		} else if (searchQuery.length === 0) {
+			search();
+		}
+	}
+
 	let isLoading = true; // for the loading spinner
 	let currentPage = 1; // track the current page
 	const itemsPerPage = 7; // how many items to display per page
@@ -42,20 +51,22 @@
 </script>
 
 <div class="bg-white shadow overflow-hidden sm:rounded-md p-4 sm:ml-64">
+	<!-- SEARCH -->
+
 	<div class="columns margins">
-		<div class="mt-1 relative rounded-md shadow-sm">
+		<div class="mt-1 relative rounded-md shadow-sm pl-5">
 			{#if isLoading}
 				<div style="display: flex; justify-content: center">
 					<div class="loader" />
 				</div>
 			{:else}
-				<div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+				<div class="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none">
 					<span class="text-gray-500 sm:text-sm"> 🔍 </span>
 				</div>
 				<input
 					bind:value={searchQuery}
 					type="text"
-					class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+					class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-9 pr-12 sm:text-sm border-gray-300 rounded-md"
 					placeholder="Search Auctions"
 				/>
 				<button
@@ -66,6 +77,9 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- PAGINATION -->
+
 	<ul class="divide-y divide-gray-200">
 		{#each paginatedAuctions as auction}
 			<li>
@@ -111,7 +125,7 @@
 					class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
 					aria-label="Pagination"
 				>
-					{#each displayedPageNumbers as page}
+					{#each displayedPageNumbers as page (page)}
 						{#if page === '...'}
 							<span
 								class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -122,7 +136,7 @@
 							<button
 								class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-blue-100 {currentPage ===
 								page
-									? 'bg-green-200'
+									? 'bg-green-500 text-indigo-600 border-indigo-600 border-2'
 									: ''}"
 								on:click={() => (currentPage = page)}
 							>
@@ -153,18 +167,5 @@
 		100% {
 			transform: rotate(360deg);
 		}
-	}
-
-	.autocomplete-container {
-		width: 50%;
-		margin: auto;
-		margin-bottom: 1em;
-		padding: 0.5em;
-		border-radius: 5px;
-		max-height: 12px;
-	}
-
-	.autocomplete {
-		width: 100%;
 	}
 </style>

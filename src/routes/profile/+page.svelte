@@ -2,31 +2,68 @@
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabaseClient';
 	import ModalSuccessProfile from '../../components/modalSuccessProfile.svelte';
+	import { userSession } from '../../stores/userSession';
+	import { browser } from '$app/environment';
 	export let data;
 
-	// Initialize the variables
-	let username, about, first_name, last_name, country, address, city, state, zip;
 	let showModal = false;
+	let initialUsername,
+		initialAbout,
+		initialFirst_name,
+		initialLast_name,
+		initialCountry,
+		initialAddress,
+		initialCity,
+		initialState,
+		initialZip;
+	let username, about, first_name, last_name, country, address, city, state, zip;
+
+	// Your reactive statement
+	let previousData = null;
 
 	$: if (data && data.props && data.props.profileData) {
-		// When data is available, set the variables
-		username = data.props.profileData.username ? data.props.profileData.username : '';
-		about = data.props.profileData.about ? data.props.profileData.about : '';
-		first_name = data.props.profileData.first_name ? data.props.profileData.first_name : '';
-		last_name = data.props.profileData.last_name ? data.props.profileData.last_name : '';
-		country = data.props.profileData.country ? data.props.profileData.country : '';
-		address = data.props.profileData.address ? data.props.profileData.address : '';
-		city = data.props.profileData.city ? data.props.profileData.city : '';
-		state = data.props.profileData.state ? data.props.profileData.state : '';
-		zip = data.props.profileData.zip ? data.props.profileData.zip : '';
+		// Check if data has changed
+		if (data.props.profileData !== previousData) {
+			// When data is available and changed, set the initial values
+			initialUsername = data.props.profileData.username ? data.props.profileData.username : '';
+			initialAbout = data.props.profileData.about ? data.props.profileData.about : '';
+			initialFirst_name = data.props.profileData.first_name
+				? data.props.profileData.first_name
+				: '';
+			initialLast_name = data.props.profileData.last_name ? data.props.profileData.last_name : '';
+			initialCountry = data.props.profileData.country ? data.props.profileData.country : '';
+			initialAddress = data.props.profileData.address ? data.props.profileData.address : '';
+			initialCity = data.props.profileData.city ? data.props.profileData.city : '';
+			initialState = data.props.profileData.state ? data.props.profileData.state : '';
+			initialZip = data.props.profileData.zip ? data.props.profileData.zip : '';
+
+			// Also update the input values
+			username = initialUsername;
+			about = initialAbout;
+			first_name = initialFirst_name;
+			last_name = initialLast_name;
+			country = initialCountry;
+			address = initialAddress;
+			city = initialCity;
+			state = initialState;
+			zip = initialZip;
+
+			// Update the previousData
+			previousData = data.props.profileData;
+		}
 	}
 
 	function handleCancel() {
 		goto('/auctions');
 	}
 
+	let currentUser = $userSession;
+	userSession.subscribe((value) => {
+		if (browser) currentUser = value.user.id;
+	});
+
 	async function handleSave() {
-		let userID = data.props.profileData.user_id;
+		let userID = currentUser;
 		// update supabase user table with new data, for this user ID
 		const { dataUpdate, error } = await supabase
 			.from('users')

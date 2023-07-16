@@ -4,7 +4,7 @@
 	import ModalSuccessAuction from '../../../components/modalSuccessAuction.svelte';
 
 	export let data;
-	//console.log('data in profile page: ', data.profileData);
+	console.log('data in profile page: ', data);
 
 	// if no data, field is null
 	let first_name = data.profileData.first_name ? data.profileData.first_name : '';

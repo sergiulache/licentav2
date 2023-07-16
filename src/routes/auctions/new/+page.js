@@ -11,6 +11,7 @@ async function getProfileData() {
 		if (loggedIn) {
 			const userID = await getCurrentUserID();
 			const { data, error } = await supabase.from('users').select().eq('user_id', userID);
+			console.log('current data: ', data[0]);
 			return data[0];
 		} else {
 			throw redirect(302, '/auth/login');

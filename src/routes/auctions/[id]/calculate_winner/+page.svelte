@@ -5,6 +5,7 @@
 	import { userSession } from '../../../../stores/userSession.js';
 	import { browser } from '$app/environment';
 	import { get } from 'svelte/store';
+	import toast, { Toaster } from 'svelte-french-toast';
 
 	export let data;
 	//console.log(data);
@@ -12,6 +13,8 @@
 	$: first_name = '';
 	$: last_name = '';
 	$: email = '';
+	$: winnerID = '';
+	$: item_id = data.item_id;
 
 	$: jwt = null;
 
@@ -47,9 +50,10 @@
 
 		if (response.ok) {
 			const result = await response.json();
-			//console.log('winner', result.winner.bidder_id);
+			//console.log('winner', result);
+			winnerID = result.winner.bidder_id;
 			winnerInformation = await getWinnerData(result.winner.bidder_id);
-			console.log('winnerInformation', winnerInformation);
+			//console.log('winnerInformation', winnerInformation);
 			first_name = winnerInformation[0].first_name;
 			last_name = winnerInformation[0].last_name;
 			email = winnerInformation[0].email;
@@ -65,11 +69,40 @@
 		calculateWinner();
 	});
 
-	function confirmIdentity() {
-		goto('/confirm_identity');
+	// New function to add notification to the database
+	async function addNotification() {
+		const { data: dataInsert, error } = await supabase.from('notifications').insert([
+			{
+				user_id: winnerID,
+				item_id: item_id,
+				dismissed: false
+			}
+		]);
+
+		if (error) {
+			console.error('Error adding notification:', error.message);
+			if (error.message.includes('duplicate key value violates unique constraint')) {
+				toast('Winner has already been notified!', {
+					icon: '🎉'
+				});
+				return;
+			} else {
+				throw new Error('Failed to add notification!');
+			}
+		}
+
+		toast.success('The winner will be notified!');
+		return;
+	}
+
+	async function confirmWinner() {
+		addNotification().catch((error) => {
+			toast(error.message, { icon: '❌' });
+		});
 	}
 </script>
 
+<Toaster />
 <div class="bg-white p-4 sm:ml-64 transition-opacity animate-fadeIn">
 	<div class="mx-auto py-16 px-4 sm:py-6 sm:px-6 lg:max-w-7xl lg:px-8 text-center">
 		<h1 class="text-4xl font-bold text-gray-800 mb-6">Winner Announcement</h1>
@@ -88,10 +121,10 @@
 
 		{#if first_name}
 			<button
-				on:click={confirmIdentity}
+				on:click={confirmWinner}
 				type="button"
 				class="mt-10 w-full p-4 rounded-md border border-gray-300 bg-white text-base font-medium text-gray-700 shadow-sm hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm transition-colors duration-200"
-				>Confirm Identity</button
+				>Confirm Winner</button
 			>
 		{/if}
 	</div>

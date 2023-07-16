@@ -9,8 +9,13 @@ async function getProfileData() {
 		let session = get(userSession);
 		if (session) {
 			const userID = session.user.id; // retrieve user_id directly from session store
-			//console.log('userID in profile page' + userID);
-			const { data, error } = await supabase.from('users').select().eq('user_id', userID);
+			console.log('userID in profile page' + userID);
+
+			const { data, error } = await supabase
+				.from('users')
+				.select('*')
+				.filter('user_id', 'eq', userID);
+			console.log('current data: ', data[0]);
 			if (error) throw error;
 			return data[0];
 		} else {
@@ -21,9 +26,6 @@ async function getProfileData() {
 
 export async function load() {
 	let profileData = await getProfileData();
-
-	// print jsonified data to console
-	//console.log(JSON.stringify(profileData));
 	return {
 		props: {
 			profileData

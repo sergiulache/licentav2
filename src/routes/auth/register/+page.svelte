@@ -3,6 +3,9 @@
 	// import transitions from svelte
 	import { fade, fly, slide } from 'svelte/transition';
 	import { quintOut, expoOut } from 'svelte/easing';
+	import { userSession } from '../../../stores/userSession';
+	import { browser } from '$app/environment';
+	import { current } from '../../../stores/currentNav';
 
 	let email = '';
 	let password = '';
@@ -41,18 +44,90 @@
 		}
 	};
 
-	function register() {
-		supabase.auth.signUp({ email, password }).then(({ user, session, error }) => {
-			if (!verifyEmail()) {
-				badFormat = true;
-			} else if (error) {
-				emailExists = true;
-			} else {
-				emailExists = false;
+	// async function register() {
+	// 	const { user, error } = await supabase.auth.signUp({ email, password });
+	// 	if (!verifyEmail()) {
+	// 		badFormat = true;
+	// 	} else if (error) {
+	// 		emailExists = true;
+	// 	} else {
+	// 		emailExists = false;
+	// 		console.log('user: ', user);
+	// 		if (user) {
+	// 			// insert the new user to the users table
+
+	// 			const { data, error: insertError } = await supabase.from('users').insert([
+	// 				{
+	// 					user_id: user.id,
+	// 					email: email
+	// 					// ... other fields as necessary
+	// 				}
+	// 			]);
+
+	// 			if (insertError) {
+	// 				console.error('Error inserting to users table: ', insertError);
+	// 			}
+	// 		}
+
+	// 		// redirect to login page
+	// 		alert('Account created! Please login.');
+	// 	}
+	// }
+
+	let accountCreated = false;
+
+	async function register() {
+		const { data, error } = await supabase.auth.signUp({ email, password });
+		if (!verifyEmail()) {
+			badFormat = true;
+		} else if (error) {
+			emailExists = true;
+		} else {
+			emailExists = false;
+			console.log('data: ', data);
+			if (data?.user) {
+				// insert the new user to the users table
+
+				const { data: insertData, error: insertError } = await supabase.from('users').insert([
+					{
+						user_id: data.user.id,
+						email: email
+						// ... other fields as necessary
+					}
+				]);
+
+				if (insertError) {
+					console.error('Error inserting to users table: ', insertError);
+				}
+
 				// redirect to login page
 				alert('Account created! Please login.');
 			}
-		});
+		}
+	}
+
+	async function getUserId(email) {
+		const { data, error } = await supabase.from('auth.users').select('id').eq('email', email);
+
+		if (error) {
+			console.error('Error fetching user: ', error);
+			return null;
+		} else {
+			return data[0].id;
+		}
+	}
+
+	function addToCustomUsersTable() {
+		supabase.from('users').insert([
+			{
+				user_id: getUserId(email)
+				// ... other fields as necessary
+			}
+		]);
+	}
+
+	$: if (accountCreated) {
+		addToCustomUsersTable();
 	}
 </script>
 

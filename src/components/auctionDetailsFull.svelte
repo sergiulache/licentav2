@@ -9,11 +9,14 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import toast, { Toaster } from 'svelte-french-toast';
+	import { current } from '../stores/currentNav';
 
 	export let data;
 
 	// console log jsonified dat
-	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.sellerReviews));
+	//console.log('auctionDetailsFull.svelte: ' + JSON.stringify(data.props.bids));
+
+	let posterID = data.props.data.item.poster_id;
 
 	let validExpirationDate = false;
 
@@ -95,6 +98,10 @@
 		//console.log('handleCalculateWinner');
 		goto(`${data.props.data.item.item_id}/calculate_winner/`);
 	}
+
+	function handleViewBids() {
+		goto(`${data.props.data.item.item_id}/view_bids/`);
+	}
 </script>
 
 <Toaster />
@@ -147,31 +154,49 @@
 					<AuctionDetailsBidStats {data} />
 				</div>
 
-				<div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-					{#if !newBid && validExpirationDate}
-						<button
-							on:click={handleBid}
-							type="button"
-							class="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
-							>New bid</button
-						>
-					{:else if newBid && validExpirationDate}
-						<button
-							transition:fade={{ duration: 2000 }}
-							on:click={handleConfirmBid}
-							type="button"
-							class="w-full py-3 px-8 flex items-center justify-center text-base bg-green-600 text-white hover:bg-green-700 hover:-translate-y-1 hover:scale-105 hover:border-green-400 border-b-4 rounded-lg duration-300 "
-							>Confirm Bid</button
-						>
-					{/if}
+				{#if currentUser !== posterID}
+					<div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+						{#if !newBid && validExpirationDate}
+							<button
+								on:click={handleBid}
+								type="button"
+								class="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+								>New bid</button
+							>
+						{:else if newBid && validExpirationDate}
+							<button
+								transition:fade={{ duration: 2000 }}
+								on:click={handleConfirmBid}
+								type="button"
+								class="w-full py-3 px-8 flex items-center justify-center text-base bg-green-600 text-white hover:bg-green-700 hover:-translate-y-1 hover:scale-105 hover:border-green-400 border-b-4 rounded-lg duration-300 "
+								>Confirm Bid</button
+							>
+						{/if}
 
-					<button
-						on:click={handleContact}
-						type="button"
-						class="w-full bg-indigo-50 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
-						>Contact seller</button
-					>
-				</div>
+						<button
+							on:click={handleContact}
+							type="button"
+							class="w-full bg-indigo-50 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+							>Contact seller</button
+						>
+					</div>
+				{/if}
+				{#if currentUser === posterID}
+					<div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+						<button
+							on:click={handleCalculateWinner}
+							type="button"
+							class="w-50 bg-indigo-50 border border-transparent rounded-md py-3 mt-8 px-8 flex items-center justify-center text-base font-medium text-green-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+							>Calculate Winner</button
+						>
+						<button
+							on:click={handleViewBids}
+							type="button"
+							class="w-50 bg-indigo-600 border border-transparent rounded-md py-3 mt-8 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
+							>View Bids</button
+						>
+					</div>
+				{/if}
 
 				<!-- add a form that slides down when the button is pressed for confirming the bid details-->
 				{#if newBid && validExpirationDate}
@@ -332,12 +357,6 @@
 						</li>
 					</ul>
 				</div>
-				<button
-					on:click={handleCalculateWinner}
-					type="button"
-					class="w-50 bg-indigo-50 border border-transparent rounded-md py-3 mt-8 px-8 flex items-center justify-center text-base font-medium text-green-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500"
-					>Calculate Winner</button
-				>
 			</div>
 
 			<div class="w-full max-w-2xl mx-auto mt-16 lg:max-w-none lg:mt-0 lg:col-span-4">

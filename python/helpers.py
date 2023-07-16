@@ -220,7 +220,6 @@ def compare_faces_aws(sourceFile, targetFile):
 import jwt
 
 def verify_jwt(jwt_token):
-    # Replace the following string with your Supabase JWT secret
     supabase_jwt_secret = "KEImASZsg3WOGUG0vm6qcCbH+lDKNPPE5sGN2OQm3r3WKuWIQmf7Ns/2+XlqvjSWEVrqf0PQStkFWtkSCcBYuQ=="
 
     try:
