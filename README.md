@@ -1,6 +1,6 @@
 # Service Auction Platform
 
-This is a fancy auction platform for contracts and services. This project is powered by [SvelteKit](https://kit.svelte.dev/) and [Supabase](https://supabase.io/), delivering a secure, efficient, and user-friendly platform.
+This is an auction platform for contracts and services. This project is powered by [SvelteKit](https://kit.svelte.dev/) and [Supabase](https://supabase.io/), delivering a secure, efficient, and user-friendly platform.
 
 ## Project Overview
 
